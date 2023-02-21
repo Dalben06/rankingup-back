@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{7012EF14-763A-4EDB-AA05-E7949C72C376}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApps", "WebApps", "{69ABDE1B-D330-4F06-9A6D-88F9528715FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{2E35BBFB-1DB7-4F32-86AE-9D9FC96B69B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pagament", "Pagament", "{CD69BD36-E89E-438B-855F-51623FEEF8E6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Player", "Player", "{01AFD601-EF6D-48D5-A294-70DE74253CB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Club", "Club", "{AB7DAED4-B41F-41F0-9C21-8174099DBD74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tournament", "Tournament", "{CF37DE30-D9C7-4B8D-9423-39AFF10EA59C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Core", "Source\RankingUp.Core\RankingUp.Core.csproj", "{F838CA6F-E6F1-4609-BCE7-871985F07FED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RankingUp.Player.Domain", "Source\RankingUp.Player.Domain\RankingUp.Player.Domain.csproj", "{41E15577-8C36-4485-80C9-A3D17246D537}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RankingUp.Club.Domain", "Source\RankingUp.Club.Domain\RankingUp.Club.Domain.csproj", "{C0122C87-48E3-448E-9676-1ECC0AF28888}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F838CA6F-E6F1-4609-BCE7-871985F07FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F838CA6F-E6F1-4609-BCE7-871985F07FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F838CA6F-E6F1-4609-BCE7-871985F07FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F838CA6F-E6F1-4609-BCE7-871985F07FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41E15577-8C36-4485-80C9-A3D17246D537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41E15577-8C36-4485-80C9-A3D17246D537}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41E15577-8C36-4485-80C9-A3D17246D537}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41E15577-8C36-4485-80C9-A3D17246D537}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0122C87-48E3-448E-9676-1ECC0AF28888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0122C87-48E3-448E-9676-1ECC0AF28888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0122C87-48E3-448E-9676-1ECC0AF28888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0122C87-48E3-448E-9676-1ECC0AF28888}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2E35BBFB-1DB7-4F32-86AE-9D9FC96B69B9} = {7012EF14-763A-4EDB-AA05-E7949C72C376}
+		{CD69BD36-E89E-438B-855F-51623FEEF8E6} = {7012EF14-763A-4EDB-AA05-E7949C72C376}
+		{01AFD601-EF6D-48D5-A294-70DE74253CB2} = {7012EF14-763A-4EDB-AA05-E7949C72C376}
+		{AB7DAED4-B41F-41F0-9C21-8174099DBD74} = {7012EF14-763A-4EDB-AA05-E7949C72C376}
+		{CF37DE30-D9C7-4B8D-9423-39AFF10EA59C} = {7012EF14-763A-4EDB-AA05-E7949C72C376}
+		{F838CA6F-E6F1-4609-BCE7-871985F07FED} = {2E35BBFB-1DB7-4F32-86AE-9D9FC96B69B9}
+		{41E15577-8C36-4485-80C9-A3D17246D537} = {01AFD601-EF6D-48D5-A294-70DE74253CB2}
+		{C0122C87-48E3-448E-9676-1ECC0AF28888} = {AB7DAED4-B41F-41F0-9C21-8174099DBD74}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2796BB28-6981-4249-977A-65631C13B469}
+	EndGlobalSection
+EndGlobal
