@@ -1,9 +1,10 @@
 ﻿using Dapper.Contrib.Extensions;
 using RankingUp.Core.DataAnnotations;
+using System;
 
 namespace RankingUp.Core.Domain
 {
-    public abstract class BaseEntity
+    public abstract class BaseEntity : Notifiable
     {
         [Key]
         public int Id { get; set; }
@@ -14,15 +15,7 @@ namespace RankingUp.Core.Domain
 
         public BaseEntity()
         {
-            UUId = Guid.NewGuid();
-        }
-
-        public BaseEntity(Guid guid)
-        {
-            if (guid != Guid.Empty)
-                UUId = guid;
-            else
-                UUId = Guid.NewGuid();
+            UUId = UUId == Guid.Empty ? Guid.NewGuid() : UUId;
         }
 
         public override bool Equals(object obj)
@@ -59,6 +52,14 @@ namespace RankingUp.Core.Domain
         public override string ToString()
         {
             return $"{GetType().Name} [Id={Id}] [UUId={UUId}]";
+        }
+
+        public T DeepClone<T>() where T : BaseEntity
+        {
+            T newEntity = (T)this.MemberwiseClone();
+            newEntity.Id = 0;
+            newEntity.UUId = Guid.NewGuid();
+            return newEntity;
         }
 
         public abstract void Disable(long IdUsuario);

@@ -24,7 +24,14 @@ namespace RankingUp.Core.Data
         }
         private string ObterTable<T>()
         {
-            return typeof(T)?.GetCustomAttribute<TableAttribute>()?.Name ?? "";
+            var tableName = typeof(T)?.GetCustomAttribute<TableAttribute>()?.Name;
+            if (tableName == null)
+                tableName = typeof(T).Name;
+
+            if (tableName.Substring(tableName.Length - 1, 1)[0].ToString().ToLower() != "s")
+                tableName += "s";
+
+            return tableName;
         }
 
         public void Dispose()
@@ -69,7 +76,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryFirstAsync<T>(SqlBase + $" AND {ObterTable<T>()}.Id = @Id", new { Id, Deletado = false });
+                    return await con.QueryFirstAsync<T>(SqlBase + $" AND {ObterTable<T>()}.Id = @Id", new { Id });
                 };
             }
             catch (Exception) { throw; }
@@ -80,7 +87,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -91,7 +98,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -102,7 +109,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -113,7 +120,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -124,7 +131,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -136,7 +143,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryFirstAsync<T>(SqlBase + $" AND {ObterTable<T>()}.UUId = @UUId", new { UUId, Deletado = false });
+                    return await con.QueryFirstAsync<T>(SqlBase + $" AND {ObterTable<T>()}.UUId = @UUId", new { UUId });
                 }
             }
             catch (Exception) { throw; }
@@ -147,7 +154,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId }))?.FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -158,7 +165,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -169,7 +176,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -180,7 +187,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -191,7 +198,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId, Deletado = false })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
-    <ProjectReference Include="..\RankingUp.Sport.Domain\RankingUp.Sport.Domain.csproj" />
   </ItemGroup>
 
 </Project>

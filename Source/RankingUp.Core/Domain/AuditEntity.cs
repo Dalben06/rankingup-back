@@ -18,6 +18,10 @@ namespace RankingUp.Core.Domain
         public int? DeletePersonId { get; set; }
 
 
-
+        public AuditEntity(int UserId): base() 
+        {
+            CreateDate = UpdateDate = DateTime.UtcNow;
+            CreatePersonId = UpdatePersonId = UserId;
+        }
     }
 }
