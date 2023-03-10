@@ -3,6 +3,7 @@ using RankingUp.Club.Data.Repositories;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Configuration;
 using RankingUp.Core.Data;
+using RankingUp.Sport.Application.Services;
 using RankingUp.Sport.Data.Repositories;
 using RankingUp.Sport.Domain.Repositories;
 using System.Configuration;
@@ -46,6 +47,7 @@ namespace RankingUp.WebApp.API.Setup
 
         private static void RegisterServiceSport(this IServiceCollection services)
         {
+            services.AddScoped<ISportAppService, SportAppService>();
             services.AddScoped<ISportsRepository, SportsRepository>();
         }
     }

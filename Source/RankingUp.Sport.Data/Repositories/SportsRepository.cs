@@ -21,7 +21,7 @@ namespace RankingUp.Sport.Data.Repositories
             ";
         }
 
-        public Task<IEnumerable<Sports>> GetAll() =>  _baseRepository.GetAsync<Sports>(" AND sports.IsEnable = 1 ");
+        public Task<IEnumerable<Sports>> GetAll() =>  _baseRepository.GetAsync<Sports>();
         public Task<Sports> GetById(Guid Id) => _baseRepository.GetByIdAsync<Sports>(Id);
         public Task<Sports> GetById(int Id) => _baseRepository.GetByIdAsync<Sports>(Id);
     }

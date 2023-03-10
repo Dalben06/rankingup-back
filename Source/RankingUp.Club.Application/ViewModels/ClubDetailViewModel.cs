@@ -40,6 +40,9 @@ namespace RankingUp.Club.Application.ViewModels
         [StringLength( 100, ErrorMessage = "O Twitter pode ter no maxino {1} caracteres")]
         public string TwitterUrl { get; set; }
 
+        [StringLength(200, ErrorMessage = "O Email pode ter no maxino {1} caracteres")]
+        public string Email { get; set; }
+
         public int UserId { get; set; }
 
         //public IEnumerable<> MyProperty { get; set; }

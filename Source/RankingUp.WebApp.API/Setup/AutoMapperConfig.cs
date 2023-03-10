@@ -1,4 +1,5 @@
 ﻿using RankingUp.Club.Application.AutoMapper;
+using RankingUp.Sport.Application.AutoMapper;
 
 namespace RankingUp.WebApp.API.Setup
 {
@@ -10,6 +11,7 @@ namespace RankingUp.WebApp.API.Setup
 
             services.AddAutoMapper(typeof(RankingUpClubProfileDomain));
             services.AddAutoMapper(typeof(RankingUpClubProfileViewModelDomain));
+            services.AddAutoMapper(typeof(RankingUpSportProfileDomain));
         }
     }
 }

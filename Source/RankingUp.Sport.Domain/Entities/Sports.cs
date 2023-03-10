@@ -6,11 +6,11 @@ namespace RankingUp.Sport.Domain.Entities
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public bool IsEnable { get; private set; }
+        //public bool IsEnable { get; private set; }
 
         // To Do pensar em criar um IENumerable<SportRule> para colocar as regras do sports
 
-        public override void Disable(long IdUsuario) => this.IsEnable = false;
+        public override void Disable(long IdUsuario) { }
 
 
         public override void Validate()

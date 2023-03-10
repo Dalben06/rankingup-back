@@ -20,6 +20,7 @@
     <ProjectReference Include="..\RankingUp.Club.Application\RankingUp.Club.Application.csproj" />
     <ProjectReference Include="..\RankingUp.Club.Data\RankingUp.Club.Data.csproj" />
     <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
+    <ProjectReference Include="..\RankingUp.Sport.Application\RankingUp.Sport.Application.csproj" />
     <ProjectReference Include="..\RankingUp.Sport.Data\RankingUp.Sport.Data.csproj" />
   </ItemGroup>
 
