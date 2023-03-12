@@ -3,10 +3,14 @@ using RankingUp.Club.Data.Repositories;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Configuration;
 using RankingUp.Core.Data;
+using RankingUp.Player.Application.Services;
+using RankingUp.Player.Data.Repositories;
+using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Sport.Application.Services;
 using RankingUp.Sport.Data.Repositories;
 using RankingUp.Sport.Domain.Repositories;
-using System.Configuration;
+using RankingUp.Tournament.Data.Repositories;
+using RankingUp.Tournament.Domain.Repositories;
 
 namespace RankingUp.WebApp.API.Setup
 {
@@ -22,6 +26,8 @@ namespace RankingUp.WebApp.API.Setup
             RegisterCore(services);
             RegisterServiceClub(services);
             RegisterServiceSport(services);
+            RegisterServicePlayer(services);
+            RegisterServiceTournament(services);
         }
 
 
@@ -32,9 +38,9 @@ namespace RankingUp.WebApp.API.Setup
         }
         private static void RegisterCore(this IServiceCollection services)
         {
-            services.AddTransient<DbContext>();
+            services.AddSingleton<DbContext>();
             services.AddSingleton<DbFactory>();
-            services.AddTransient<IBaseRepository, BaseRepository>();
+            services.AddSingleton<IBaseRepository, BaseRepository>();
         }
 
 
@@ -49,6 +55,19 @@ namespace RankingUp.WebApp.API.Setup
         {
             services.AddScoped<ISportAppService, SportAppService>();
             services.AddScoped<ISportsRepository, SportsRepository>();
+        }
+
+        private static void RegisterServicePlayer(this IServiceCollection services)
+        {
+            services.AddScoped<IPlayerAppService, PlayerAppService>();
+            services.AddScoped<IPlayerClubsRepository, PlayerClubsRepository>();
+            services.AddScoped<IPlayerSportsRepository, PlayerSportsRepository>();
+            services.AddScoped<IPlayerRepository, PlayerRepository>();
+        }
+
+        private static void RegisterServiceTournament(this IServiceCollection services)
+        {
+            services.AddScoped<ITournamentsRepository, TournamentsRepository>();
         }
     }
 }

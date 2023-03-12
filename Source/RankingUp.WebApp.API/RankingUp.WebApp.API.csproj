@@ -20,8 +20,12 @@
     <ProjectReference Include="..\RankingUp.Club.Application\RankingUp.Club.Application.csproj" />
     <ProjectReference Include="..\RankingUp.Club.Data\RankingUp.Club.Data.csproj" />
     <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
+    <ProjectReference Include="..\RankingUp.Player.Application\RankingUp.Player.Application.csproj" />
+    <ProjectReference Include="..\RankingUp.Player.Data\RankingUp.Player.Data.csproj" />
     <ProjectReference Include="..\RankingUp.Sport.Application\RankingUp.Sport.Application.csproj" />
     <ProjectReference Include="..\RankingUp.Sport.Data\RankingUp.Sport.Data.csproj" />
+    <ProjectReference Include="..\RankingUp.Tournament.Data\RankingUp.Tournament.Data.csproj" />
+    <ProjectReference Include="..\RankingUp.Tournament.Domain\RankingUp.Tournament.Domain.csproj" />
   </ItemGroup>
 
 </Project>

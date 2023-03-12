@@ -3,10 +3,13 @@ using RankingUp.Core.Data;
 
 namespace RankingUp.Club.Domain.IRepositories
 {
-    public interface IClubRepository : IInsertRepository<Entities.Club> , IUpdateRepository<Entities.Club>, IDeleteRepository<Entities.Club>, IGetRepository<Entities.Club>
+    public interface IClubRepository : IInsertRepository<Clubs> , IUpdateRepository<Clubs>, IDeleteRepository<Clubs>, IGetRepository<Clubs>
     {
 
-        Task<IEnumerable<Entities.Club>> GetClubsBySportId(Guid Id);
+        Task<IEnumerable<Clubs>> GetClubsBySportId(Guid Id);
+        Task<IEnumerable<Clubs>> GetClubs(Guid[] Id);
+        Task<IEnumerable<Clubs>> GetClubAndSportId(Guid ClubId, Guid SportId);
+
 
     }
 }

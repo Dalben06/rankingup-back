@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RankingUp.Club.Application\RankingUp.Club.Application.csproj" />
+    <ProjectReference Include="..\RankingUp.Club.Domain\RankingUp.Club.Domain.csproj" />
+    <ProjectReference Include="..\RankingUp.Player.Domain\RankingUp.Player.Domain.csproj" />
+    <ProjectReference Include="..\RankingUp.Sport.Application\RankingUp.Sport.Application.csproj" />
+  </ItemGroup>
+
+</Project>

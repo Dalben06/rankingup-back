@@ -3,6 +3,7 @@ using RankingUp.Club.Application.ViewModels;
 using RankingUp.Club.Domain.Entities;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Domain;
+using RankingUp.Sport.Domain.Entities;
 using RankingUp.Sport.Domain.Repositories;
 using System.Transactions;
 
@@ -44,9 +45,7 @@ namespace RankingUp.Club.Application.Services
         {
             try
             {
-                return new RequestResponse<IEnumerable<ClubViewModel>>(
-                    this._mapper.Map<IEnumerable<ClubViewModel>>(await _clubRepository.GetClubsBySportId(Id))
-                    , new Notifiable());
+                return new RequestResponse<IEnumerable<ClubViewModel>>(this._mapper.Map<IEnumerable<ClubViewModel>>(await _clubRepository.GetClubsBySportId(Id)), new Notifiable());
             }
             catch (Exception ex)
             {
@@ -59,18 +58,28 @@ namespace RankingUp.Club.Application.Services
             var noticable = new Notifiable();
             try
             {
-                var domainObject = _mapper.Map<Domain.Entities.Club>(clubDetailViewModel);
-                domainObject.Validate();
-                noticable.AddNotifications(domainObject.Notifications);
+                var club = _mapper.Map<Clubs>(clubDetailViewModel);
+                noticable.AddNotifications(club.Notifications);
+
+
+                IEnumerable<Sports> sports = Enumerable.Empty<Sports>();
+                if (sports.Any())
+                    sports = await _sportsRepository.GetByIds(club.Sports.Select(x => x.UUId).ToArray());
 
                 if (noticable.Valid)
                 {
+                    
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        domainObject = await _clubRepository.InsertAsync(domainObject);
+                        club = await _clubRepository.InsertAsync(club);
+                        if (club.Sports != null && club.Sports.Any())
+                        {
+                            foreach (var sport in club.Sports)
+                                await _clubSportRepository.InsertAsync(new ClubSport(club.Id, sports.FirstOrDefault(sport => sport.UUId == sport.UUId).Id, club.CreatePersonId));
+                        }
                         scope.Complete();
                     }
-                    return new RequestResponse<ClubDetailViewModel>(_mapper.Map<ClubDetailViewModel>(await _clubRepository.GetById(domainObject.UUId)), noticable);
+                    return new RequestResponse<ClubDetailViewModel>(_mapper.Map<ClubDetailViewModel>(await _clubRepository.GetById(club.UUId)), noticable);
                 }
             }
             catch (Exception ex)
@@ -85,24 +94,24 @@ namespace RankingUp.Club.Application.Services
             var noticable = new Notifiable();
             try
             {
-                var domainObject = _mapper.Map<Domain.Entities.Club>(clubDetailViewModel);
-                var orig = await _clubRepository.GetById(domainObject.UUId);
+                var club = _mapper.Map<Clubs>(clubDetailViewModel);
+                var orig = await _clubRepository.GetById(club.UUId);
 
                 if (orig is null)
                     noticable.AddNotification("Clube não encontrado!");
 
-                domainObject.Validate();
-                noticable.AddNotifications(domainObject.Notifications);
+                club.Validate();
+                noticable.AddNotifications(club.Notifications);
 
                 if (noticable.Valid)
                 {
-                    
+                    club.Id = orig.Id;
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        await _clubRepository.InsertAsync(domainObject);
+                        await _clubRepository.UpdateAsync(club);
                         scope.Complete();
                     }
-                    return new RequestResponse<ClubDetailViewModel>(_mapper.Map<ClubDetailViewModel>(await _clubRepository.GetById(domainObject.UUId)), noticable);
+                    return new RequestResponse<ClubDetailViewModel>(_mapper.Map<ClubDetailViewModel>(await _clubRepository.GetById(club.UUId)), noticable);
                 }
             }
             catch (Exception ex)
@@ -153,6 +162,8 @@ namespace RankingUp.Club.Application.Services
             var viewModel = new ClubSportViewModel();
             try
             {
+
+
                 var club = await _clubRepository.GetById(clubDetailViewModel.ClubUUId);
                 if (club is null)
                     throw new Exception("Clube não encontrado!");
@@ -161,11 +172,16 @@ namespace RankingUp.Club.Application.Services
                 if (sport is null)
                     throw new Exception("Esporte não encontrado!");
 
+                var exist = await _clubRepository.GetClubAndSportId(clubDetailViewModel.ClubUUId, clubDetailViewModel.SportUUId);
+                if(exist != null && exist.Any())
+                    throw new Exception("Esporte ja cadastrado!");
+
                 if (noticable.Valid)
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        viewModel = _mapper.Map<ClubSportViewModel>( await _clubSportRepository.InsertAsync(new ClubSport(club.Id,sport.Id,clubDetailViewModel.UserId)));
+                        var result = await _clubSportRepository.InsertAsync(new ClubSport(club.Id, sport.Id, clubDetailViewModel.UserId));
+                        viewModel = _mapper.Map<ClubSportViewModel>(await _clubSportRepository.GetById(result.UUId));
                         scope.Complete();
                     }
                 }

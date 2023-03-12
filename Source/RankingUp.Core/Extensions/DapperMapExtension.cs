@@ -297,6 +297,7 @@ namespace RankingUp.Core.Extensions
             {
                 entityToInsert.Id = await sqlAdapter.InsertAsync(connection, transaction, commandTimeout, name, sbColumnList.ToString(),
                     sbParameterList.ToString(), keyProperties, entityToInsert);
+                return entityToInsert;
             }
 
             //insert list of entities

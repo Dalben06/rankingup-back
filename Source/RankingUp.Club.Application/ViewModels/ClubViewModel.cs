@@ -1,11 +1,14 @@
-﻿namespace RankingUp.Club.Application.ViewModels
+﻿
+using RankingUp.Core.ViewModels;
+
+namespace RankingUp.Club.Application.ViewModels
 {
-    public class ClubViewModel
+    public class ClubViewModel : BaseViewModel
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public string CompleteAddress { get; set; }
-        public int BusinessHourEnd { get; set; }
-        public int BusinessHourStart { get; set; }
+        public string BusinessHourEnd { get; set; }
+        public string BusinessHourStart { get; set; }
     }
 }

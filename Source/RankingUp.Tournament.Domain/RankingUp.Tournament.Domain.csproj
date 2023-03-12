@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RankingUp.Club.Domain\RankingUp.Club.Domain.csproj" />
+    <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
+  </ItemGroup>
+
+</Project>

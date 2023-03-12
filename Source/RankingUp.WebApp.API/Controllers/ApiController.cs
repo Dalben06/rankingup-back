@@ -57,7 +57,7 @@ namespace RankingUp.WebApp.API.Controllers
         protected IActionResult HttpResponse(NoContentResponse model)
         {
 
-            if (!model.Notificacoes.HasNotifications)
+            if (model.Notificacoes.HasNotifications)
             {
                 return BadRequest(new
                 {

@@ -11,7 +11,6 @@ namespace RankingUp.Core.Data
     public class BaseRepository : IBaseRepository, IDisposable
     {
         private readonly DbContext _context;
-        public string SqlBase;
         public BaseRepository(DbContext context)
         {
             this._context = context;
@@ -41,11 +40,7 @@ namespace RankingUp.Core.Data
             GC.SuppressFinalize(this);
         }
 
-        public void SetSql(string SQL)
-        {
-            this.SqlBase = SQL;
-        }
-
+      
         //private string GetPaginationSQL<T>(Paginacao<T> pag, string sql)
         //{
         //    sql += @$"
@@ -70,135 +65,135 @@ namespace RankingUp.Core.Data
 
         #region GetById
 
-        public async Task<T> GetByIdAsync<T>(long Id) where T : BaseEntity
+        public async Task<T> GetByIdAsync<T>(string SQL,long Id) where T : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryFirstAsync<T>(SqlBase + $" AND {ObterTable<T>()}.Id = @Id", new { Id });
+                    return await con.QueryFirstAsync<T>(SQL + $" AND {ObterTable<T>()}.Id = @Id", new { Id });
                 };
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2>(long Id, Func<T1, T2, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2>(string SQL, long Id, Func<T1, T2, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3>(long Id, Func<T1, T2, T3, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3>(string SQL, long Id, Func<T1, T2, T3, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3, T4>(long Id, Func<T1, T2, T3, T4, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3, T4>(string SQL, long Id, Func<T1, T2, T3, T4, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5>(long Id, Func<T1, T2, T3, T4, T5, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5>(string SQL, long Id, Func<T1, T2, T3, T4, T5, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5, T6>(long Id, Func<T1, T2, T3, T4, T5, T6, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5, T6>(string SQL, long Id, Func<T1, T2, T3, T4, T5, T6, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + $" AND {ObterTable<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
 
-        public async Task<T> GetByIdAsync<T>(Guid UUId) where T : BaseEntity
+        public async Task<T> GetByIdAsync<T>(string SQL, Guid UUId) where T : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryFirstAsync<T>(SqlBase + $" AND {ObterTable<T>()}.UUId = @UUId", new { UUId });
+                    return (await con.QueryAsync<T>(SQL + $" AND {ObterTable<T>()}.UUId = @UUId", new { UUId }))?.FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2>(Guid UUId, Func<T1, T2, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2>(string SQL, Guid UUId, Func<T1, T2, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId }))?.FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId }))?.FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3>(Guid UUId, Func<T1, T2, T3, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3>(string SQL, Guid UUId, Func<T1, T2, T3, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3, T4>(Guid UUId, Func<T1, T2, T3, T4, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3, T4>(string SQL, Guid UUId, Func<T1, T2, T3, T4, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5>(Guid UUId, Func<T1, T2, T3, T4, T5, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5>(string SQL, Guid UUId, Func<T1, T2, T3, T4, T5, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5, T6>(Guid UUId, Func<T1, T2, T3, T4, T5, T6, T1> map, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<T1> GetByIdAsync<T1, T2, T3, T4, T5, T6>(string SQL, Guid UUId, Func<T1, T2, T3, T4, T5, T6, T1> map, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -207,91 +202,69 @@ namespace RankingUp.Core.Data
         #endregion
 
         #region Get
-        public async Task<IEnumerable<T>> GetAsync<T>(object param = null) where T : BaseEntity
+        public async Task<IEnumerable<T>> GetAsync<T>(string SQL, object param = null) where T : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryAsync<T>(SqlBase, param);
-                }
-            }
-            catch (Exception) { throw; }
-        }
-        public async Task<IEnumerable<T1>> GetAsync<T1, T2>(Func<T1, T2, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
-        {
-            try
-            {
-                using (var con = this._context.NewConnection)
-                {
-                    return await con.QueryAsync<T1, T2, T1>(SqlBase, map, splitOn: splitOn, param: param);
+                    return await con.QueryAsync<T>(SQL, param);
                 }
             }
             catch (Exception) { throw; }
         }
 
-        public async Task<IEnumerable<T>> GetAsync<T>(string addicionalConditionaisSQL = null, object param = null) where T : BaseEntity
+        public async Task<IEnumerable<T1>> GetAsync<T1, T2>(string SQL, Func<T1, T2, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryAsync<T>(SqlBase + addicionalConditionaisSQL, param);
+                    return await con.QueryAsync<T1, T2, T1>(SQL , map, splitOn: splitOn, param: param);
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<IEnumerable<T1>> GetAsync<T1, T2>(Func<T1, T2, T1> map, string addicionalConditionaisSQL = null, object param = null, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3>(string SQL, Func<T1, T2, T3, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryAsync<T1, T2, T1>(SqlBase + addicionalConditionaisSQL, map, splitOn: splitOn, param: param);
+                    return await con.QueryAsync<T1, T2, T3, T1>(SQL , map, splitOn: splitOn, param: param);
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3>(Func<T1, T2, T3, T1> map, string addicionalConditionaisSQL = null, object param = null, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4>(string SQL, Func<T1, T2, T3, T4, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryAsync<T1, T2, T3, T1>(SqlBase + addicionalConditionaisSQL, map, splitOn: splitOn, param: param);
+                    return await con.QueryAsync<T1, T2, T3, T4, T1>(SQL , map, splitOn: splitOn, param: param);
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4>(Func<T1, T2, T3, T4, T1> map, string addicionalConditionaisSQL = null, object param = null, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4, T5>(string SQL, Func<T1, T2, T3, T4, T5, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryAsync<T1, T2, T3, T4, T1>(SqlBase + addicionalConditionaisSQL, map, splitOn: splitOn, param: param);
+                    return await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL , map, splitOn: splitOn, param: param);
                 }
             }
             catch (Exception) { throw; }
         }
-        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, T1> map, string addicionalConditionaisSQL = null, object param = null, string splitOn = "Id") where T1 : BaseEntity
+        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4, T5, T6>(string SQL, Func<T1, T2, T3, T4, T5, T6, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
         {
             try
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SqlBase + addicionalConditionaisSQL, map, splitOn: splitOn, param: param);
-                }
-            }
-            catch (Exception) { throw; }
-        }
-        public async Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4, T5, T6>(Func<T1, T2, T3, T4, T5, T6, T1> map, string addicionalConditionaisSQL = null, object param = null, string splitOn = "Id") where T1 : BaseEntity
-        {
-            try
-            {
-                using (var con = this._context.NewConnection)
-                {
-                    return await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SqlBase + addicionalConditionaisSQL, map, splitOn: splitOn, param: param);
+                    return await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL , map, splitOn: splitOn, param: param);
                 }
             }
             catch (Exception) { throw; }

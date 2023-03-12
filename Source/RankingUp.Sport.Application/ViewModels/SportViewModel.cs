@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RankingUp.Core.ViewModels;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RankingUp.Sport.Application.ViewModels
 {
-    public class SportViewModel
+    public class SportViewModel : BaseViewModel
     {
-        [Key]
-        public string UUId { get; set; }
         [Required(ErrorMessage = "O Nome do Esporte é obrigatório")]
         [StringLength(50, ErrorMessage = "O Nome do Esporte pode ter no maxino {1} caracteres")]
         public string Name { get; set; }

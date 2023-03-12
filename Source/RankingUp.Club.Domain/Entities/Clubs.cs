@@ -4,16 +4,20 @@ using RankingUp.Sport.Domain.Entities;
 
 namespace RankingUp.Club.Domain.Entities
 {
-    public sealed class Club : AuditEntity
+    [Table("Clubs")]
+    public sealed class Clubs : AuditEntity
     {
         public string Name { get; private set; }
         public string Description { get; private set; }
         public string Address { get; private set; }
+        public string AddressNumber { get; private set; }
+        public string AddressComplement { get; private set; }
+        public string AddressDistrict { get; private set; }
         public string City { get; private set; }
         public string State { get; private set; }
         public string Country { get; private set; }
-        public string Phone { get; private set; }
         public string PostalCode { get; private set; }
+        public string Phone { get; private set; }
         public TimeSpan BusinessHourStart { get; private set; }
         public TimeSpan BusinessHourEnd { get; private set; }
         public string FacebookUrl { get; private set; }
@@ -23,16 +27,17 @@ namespace RankingUp.Club.Domain.Entities
         public string Email { get; private set; }
         public bool IsActive { get; private set; }
         [Computed]
-        public string CompleteAddress { get {return $"{Address}, {State} - {City}, {PostalCode}. {Country}"; } }
+        public string CompleteAddress { get {return $"{Address},{AddressNumber} - {AddressComplement}, {AddressDistrict} {State} - {City}, {PostalCode}. {Country}"; } }
 
-        public Club(): base(0)
+        public Clubs(): base(0)
         {
 
         }
-        public Club(string name, string description, string address, string city, string state,
+        public Clubs(string name, string description, string address, string city, string state,
             string country, string phone, string postalCode,
             string businessHourStart, string businessHourEnd, 
-            string facebookUrl, string instagramUrl, string twitterUrl, string imageUrl, bool isActive, string Email, int UserId): base(UserId)
+            string facebookUrl, string instagramUrl, string twitterUrl, string imageUrl
+            , bool isActive, string email, string addressNumber, string addressComplement, string addressDistrict, int UserId) : base(UserId)
         {
             TimeSpan.TryParse(businessHourStart, out var startHour);
             TimeSpan.TryParse(businessHourEnd, out var endHour);
@@ -52,14 +57,17 @@ namespace RankingUp.Club.Domain.Entities
             TwitterUrl = twitterUrl;
             ImageUrl = imageUrl;
             IsActive = isActive;
-            this.Email = Email;
+            Email = email;
+            AddressNumber = addressNumber;
+            AddressComplement = addressComplement;
+            AddressDistrict = addressDistrict;
 
             Validate();
         }
 
 
         [Computed]
-        public IEnumerable<Sports> Sports { get; set; }
+        public ICollection<Sports> Sports { get; set; }
 
         public override void Disable(long IdUsuario)
         {

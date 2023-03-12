@@ -1,7 +1,9 @@
-﻿using RankingUp.Core.Domain;
+﻿using Dapper.Contrib.Extensions;
+using RankingUp.Core.Domain;
 
 namespace RankingUp.Sport.Domain.Entities
 {
+    [Table("Sports")]
     public class Sports : BaseEntity
     {
         public string Name { get; set; }

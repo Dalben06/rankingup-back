@@ -16,13 +16,13 @@ namespace RankingUp.WebApp.API.Controllers
             this._clubAppService= clubAppService;
         }
 
-        [HttpGet("GetClubsBySportId/{Id}")]
+        [HttpGet("GetClubsBySport/{Id}")]
         public async Task<IActionResult> GetClubsBySportId(Guid Id)
         {
             return HttpResponse(await this._clubAppService.GetClubsFromSports(Id));
         }
 
-        [HttpGet("GetClubById/{Id}")]
+        [HttpGet("GetClub/{Id}")]
         public async Task<IActionResult> GetClubById(Guid Id)
         {
             return HttpResponse(await this._clubAppService.GetClubById(Id));
@@ -35,7 +35,7 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._clubAppService.CreateClub(model));
         }
 
-        [HttpPost("AddSportOnClub")]
+        [HttpPost("AddSport")]
         public async Task<IActionResult> AddSportOnClub(ClubSportViewModel model)
         {
             return HttpResponse(await this._clubAppService.AddSportOnClub(model));
@@ -48,14 +48,14 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._clubAppService.UpdateClub(model));
         }
 
-        [HttpDelete("DisableClub")]
+        [HttpDelete("DisableClub/{Id}")]
         public async Task<IActionResult> DisableClub(Guid Id)
         {
             return HttpResponse(await this._clubAppService.DisableClub(Id,1));
         }
 
-        [HttpDelete("RemoveSportOnClub")]
-        public async Task<IActionResult> RemoveSportOnClub(Guid Id)
+        [HttpDelete("RemoveSport/{Id}")]
+        public async Task<IActionResult> RemoveSport(Guid Id)
         {
             return HttpResponse(await this._clubAppService.RemoveSportOnClub(Id, 1));
         }

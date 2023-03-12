@@ -7,10 +7,13 @@
             if (item is null)
                 return;
 
-            if(!value?.Any() ?? false)
-                value = new List<TSource>();
 
-            value.Concat( new List<TSource>() { item });
+            var temp = value.Concat(new List<TSource>() { item });
+
+            if (value?.Any() ?? true)
+                value = temp;
+            else
+                value = value.Concat(temp);
         }
     }
 }

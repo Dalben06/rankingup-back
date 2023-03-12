@@ -11,18 +11,20 @@ namespace RankingUp.Sport.Data.Repositories
         public SportsRepository(IBaseRepository baseRepository)
         {
             _baseRepository = baseRepository;
-            _baseRepository.SetSql(GetdefaultSql());
         }
 
-        private string GetdefaultSql()
+        private string GetDefaultSql()
         {
             return @"
                 SELECT sports.* FROM sports WHERE 1 = 1 
             ";
         }
 
-        public Task<IEnumerable<Sports>> GetAll() =>  _baseRepository.GetAsync<Sports>();
-        public Task<Sports> GetById(Guid Id) => _baseRepository.GetByIdAsync<Sports>(Id);
-        public Task<Sports> GetById(int Id) => _baseRepository.GetByIdAsync<Sports>(Id);
+        public Task<IEnumerable<Sports>> GetAll() =>  _baseRepository.GetAsync<Sports>(GetDefaultSql());
+        public Task<IEnumerable<Sports>> GetByIds(Guid[] Id) => _baseRepository.GetAsync<Sports>(GetDefaultSql() + " AND  sports.Id in @Id", new {Id});
+        public Task<Sports> GetById(Guid Id) => _baseRepository.GetByIdAsync<Sports>(GetDefaultSql(), Id);
+        public Task<Sports> GetById(int Id) => _baseRepository.GetByIdAsync<Sports>(GetDefaultSql(), Id);
+
+       
     }
 }
