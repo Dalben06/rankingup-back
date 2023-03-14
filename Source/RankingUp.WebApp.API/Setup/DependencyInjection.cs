@@ -9,6 +9,7 @@ using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Sport.Application.Services;
 using RankingUp.Sport.Data.Repositories;
 using RankingUp.Sport.Domain.Repositories;
+using RankingUp.Tournament.Application.Services;
 using RankingUp.Tournament.Data.Repositories;
 using RankingUp.Tournament.Domain.Repositories;
 
@@ -68,6 +69,7 @@ namespace RankingUp.WebApp.API.Setup
         private static void RegisterServiceTournament(this IServiceCollection services)
         {
             services.AddScoped<ITournamentsRepository, TournamentsRepository>();
+            services.AddScoped<IRankingAppService, RankingAppService>();
         }
     }
 }

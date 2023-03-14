@@ -1,6 +1,7 @@
 ﻿using RankingUp.Club.Application.AutoMapper;
 using RankingUp.Player.Application.AutoMapper;
 using RankingUp.Sport.Application.AutoMapper;
+using RankingUp.Tournament.Application.AutoMapper;
 
 namespace RankingUp.WebApp.API.Setup
 {
@@ -13,6 +14,7 @@ namespace RankingUp.WebApp.API.Setup
             services.AddAutoMapper(typeof(RankingUpClubProfileDomain));
             services.AddAutoMapper(typeof(RankingUpSportProfileDomain));
             services.AddAutoMapper(typeof(RankingUpPlayerProfile));
+            services.AddAutoMapper(typeof(RankingUpTournamentProfile));
         }
     }
 }

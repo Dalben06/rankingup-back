@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RankingUp.Tournament.Application.ViewModels;
+using RankingUp.Tournament.Domain.Entities;
 
 namespace RankingUp.Tournament.Application.AutoMapper
 {
@@ -12,6 +9,12 @@ namespace RankingUp.Tournament.Application.AutoMapper
 
         public RankingUpTournamentProfile()
         {
+            CreateMap<RankingDetailViewModel, Tournaments>()
+               .ConstructUsing(c => new Tournaments(c.Name,c.Description,c.Address,c.AddressNumber,c.AddressComplement,c.AddressDistrict,
+               c.City,c.State,c.Country,c.PostalCode,c.Phone,c.Email,c.EventDate,c.EventHourStart,c.EventHourEnd,true,true,c.OnlyClubMembers,
+               c.Price,c.MemberPrice,c.MatchSameTime,null,c.UserId,c.Latitude,c.Longitude,c.AutoQueue,c.HasNotificationToPlayer))
+               .ForMember(dest => dest.UUId, src => src.MapFrom(src => src.UUId == Guid.Empty ? Guid.NewGuid() : src.UUId))
+               .ReverseMap();
 
         }
     }
