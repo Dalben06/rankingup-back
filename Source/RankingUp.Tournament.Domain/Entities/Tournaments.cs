@@ -93,6 +93,10 @@ namespace RankingUp.Tournament.Domain.Entities
         public bool IsFinish { get => FinishDate.HasValue; }
 
 
+        // TODO CRIAR NO BD
+        [Computed]
+        public bool IsSingle { get; private set; }
+
 
         [Computed]
         public Club.Domain.Entities.Clubs Club { get; set; }
@@ -143,6 +147,7 @@ namespace RankingUp.Tournament.Domain.Entities
         {
             DeleteDate = UpdateDate = DateTime.Now;
             DeletePersonId = UpdatePersonId = (int)IdUsuario;
+            IsDeleted= true;
             IsActive = false;
         }
 

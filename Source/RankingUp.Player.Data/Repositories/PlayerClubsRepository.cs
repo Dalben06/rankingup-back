@@ -64,10 +64,18 @@ namespace RankingUp.Player.Data.Repositories
             return _baseRepository.GetAsync<Players>(SQL, new { Id });
         }
 
+        public async Task<Players> GetPlayerAndClubId(int ClubId, int PlayerId)
+        {
+            var SQL = $@" SELECT players.*  {FROM()} AND Clubs.Id = @ClubId AND players.Id = @PlayerId";
+            return (await _baseRepository.GetAsync<Players>(SQL, new { ClubId , PlayerId })).FirstOrDefault();
+        }
+
         public async Task<PlayerClubs> GetPlayersAndClubId(Guid PlayerId, Guid ClubId)
         {
             var result = await _baseRepository.GetAsync<PlayerClubs>(GetDefaultSql() + " AND Clubs.UUId = @ClubId AND Players.UUId = @PlayerId", new { PlayerId, ClubId });
             return result == null ? null : result.FirstOrDefault();
         }
+
+        
     }
 }

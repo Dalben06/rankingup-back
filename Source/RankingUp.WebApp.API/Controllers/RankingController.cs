@@ -29,6 +29,12 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._rankingAppService.GetRanking(Id));
         }
 
+        [HttpGet("GetPlayers/{Id}")]
+        public async Task<IActionResult> GetPlayers(Guid Id)
+        {
+            return HttpResponse(await this._rankingAppService.GetPlayers(Id));
+        }
+
 
         [HttpPost("CreateRanking")]
         public async Task<IActionResult> CreateRanking(RankingDetailViewModel model)
@@ -48,6 +54,12 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._rankingAppService.EndRanking(Id,1));
         }
 
+        [HttpPost("AddPlayer")]
+        public async Task<IActionResult> AddPlayer(RankingPlayerViewModel model)
+        {
+            return HttpResponse(await this._rankingAppService.AddPlayer(model));
+        }
+
 
         [HttpPut("UpdateRanking")]
         public async Task<IActionResult> UpdateRanking(RankingDetailViewModel model)
@@ -60,6 +72,12 @@ namespace RankingUp.WebApp.API.Controllers
         public async Task<IActionResult> RemoveRanking(Guid Id)
         {
             return HttpResponse(await this._rankingAppService.RemoveRanking(Id, 1));
+        }
+
+        [HttpDelete("RemovePlayer/{Id}")]
+        public async Task<IActionResult> RemovePlayer(Guid Id)
+        {
+            return HttpResponse(await this._rankingAppService.RemovePlayer(Id, 1));
         }
 
     }

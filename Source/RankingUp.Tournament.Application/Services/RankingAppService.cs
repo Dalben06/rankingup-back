@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Domain;
+using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.ViewModels;
 using RankingUp.Tournament.Domain.Entities;
 using RankingUp.Tournament.Domain.Repositories;
@@ -11,13 +12,20 @@ namespace RankingUp.Tournament.Application.Services
     public class RankingAppService : IRankingAppService
     {
         private readonly ITournamentsRepository _tournamentsRepository;
+        private readonly ITournamentTeamRepository _tournamentTeamRepository;
         private readonly IClubRepository _clubRepository;
+        private readonly IPlayerRepository _playerRepository;
+        private readonly IPlayerClubsRepository _playerClubsRepository;
         private readonly IMapper _mapper;
 
-        public RankingAppService(ITournamentsRepository tournamentsRepository, IClubRepository clubRepository, IMapper mapper)
+        public RankingAppService(ITournamentsRepository tournamentsRepository, ITournamentTeamRepository tournamentTeamRepository
+            , IClubRepository clubRepository, IPlayerRepository playerRepository, IPlayerClubsRepository playerClubsRepository, IMapper mapper)
         {
             _tournamentsRepository = tournamentsRepository;
+            _tournamentTeamRepository = tournamentTeamRepository;
             _clubRepository = clubRepository;
+            _playerRepository = playerRepository;
+            _playerClubsRepository = playerClubsRepository;
             _mapper = mapper;
         }
 
@@ -198,6 +206,83 @@ namespace RankingUp.Tournament.Application.Services
             return new NoContentResponse(noticable);
         }
 
-        
+        public async Task<NoContentResponse> RemovePlayer(Guid Id, int UseId)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var orig = await _tournamentTeamRepository.GetById(Id);
+
+                if (orig is null)
+                    throw new Exception("Jogador não encontrado!");
+
+                orig.Disable(UseId);
+                if (noticable.Valid)
+                {
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        await _tournamentTeamRepository.DeleteAsync(orig);
+                        scope.Complete();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new NoContentResponse(noticable);
+        }
+
+        public async Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId)
+        {
+            try
+            {
+                return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(
+                    this._mapper.Map<IEnumerable<RankingPlayerViewModel>>(await _tournamentTeamRepository.GetAllByTournament(RankingId))
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(ex.Message);
+            }
+        }
+
+        public async Task<RequestResponse<RankingPlayerViewModel>> AddPlayer(RankingPlayerViewModel model)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var team = new TournamentTeam
+                    (await _tournamentsRepository.GetById(model.TournamentUUId),
+                    await _playerRepository.GetById(model.PlayerUUId), true, model.UserId);
+
+                team.Validate();
+                noticable.AddNotifications(team.Notifications);
+                if (team.Tournament?.IsFinish ?? false)
+                    noticable.AddNotification("O Ranking já foi finalizado");
+
+                if(team.Tournament != null && team.Tournament.OnlyClubMembers)
+                {
+                    var playersClub = await _playerClubsRepository.GetPlayerAndClubId(team.Tournament.ClubId, team.TeamId);
+                    if(playersClub is null)
+                        noticable.AddNotification("Esse Ranking somente permite jogadores associados ao clube");
+                }
+
+                if (noticable.Valid)
+                {
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        team = await _tournamentTeamRepository.InsertAsync(team);
+                        scope.Complete();
+                    }
+                    return new RequestResponse<RankingPlayerViewModel>(_mapper.Map<RankingPlayerViewModel>(await _tournamentTeamRepository.GetById(team.Id)), noticable);
+                }
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new RequestResponse<RankingPlayerViewModel>(noticable);
+        }
     }
 }

@@ -16,6 +16,10 @@ namespace RankingUp.Tournament.Application.AutoMapper
                .ForMember(dest => dest.UUId, src => src.MapFrom(src => src.UUId == Guid.Empty ? Guid.NewGuid() : src.UUId))
                .ReverseMap();
 
+            CreateMap<RankingPlayerViewModel, TournamentTeam>()
+              .ForMember(dest => dest.UUId, src => src.MapFrom(src => src.UUId == Guid.Empty ? Guid.NewGuid() : src.UUId))
+              .ReverseMap();
+
         }
     }
 }

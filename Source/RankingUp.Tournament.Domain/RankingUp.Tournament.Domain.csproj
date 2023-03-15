@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RankingUp.Club.Domain\RankingUp.Club.Domain.csproj" />
     <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
+    <ProjectReference Include="..\RankingUp.Player.Domain\RankingUp.Player.Domain.csproj" />
   </ItemGroup>
 
 </Project>

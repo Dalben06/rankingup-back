@@ -36,6 +36,7 @@ namespace RankingUp.Player.Domain.Entities
         {
             DeleteDate = UpdateDate = DateTime.Now;
             DeletePersonId = UpdatePersonId = (int)IdUsuario;
+            IsDeleted = true;
         }
 
         public override void Validate() { }

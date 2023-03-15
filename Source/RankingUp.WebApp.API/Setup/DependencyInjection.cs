@@ -69,6 +69,7 @@ namespace RankingUp.WebApp.API.Setup
         private static void RegisterServiceTournament(this IServiceCollection services)
         {
             services.AddScoped<ITournamentsRepository, TournamentsRepository>();
+            services.AddScoped<ITournamentTeamRepository, TournamentTeamRepository>();
             services.AddScoped<IRankingAppService, RankingAppService>();
         }
     }
