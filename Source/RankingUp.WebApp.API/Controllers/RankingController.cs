@@ -35,6 +35,12 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._rankingAppService.GetPlayers(Id));
         }
 
+        [HttpGet("GetGamesGoing/{Id}")]
+        public async Task<IActionResult> GetGamesGoing(Guid Id)
+        {
+            return HttpResponse(await this._rankingAppService.GetGamesGoing(Id));
+        }
+
 
         [HttpPost("CreateRanking")]
         public async Task<IActionResult> CreateRanking(RankingDetailViewModel model)
@@ -58,6 +64,23 @@ namespace RankingUp.WebApp.API.Controllers
         public async Task<IActionResult> AddPlayer(RankingPlayerViewModel model)
         {
             return HttpResponse(await this._rankingAppService.AddPlayer(model));
+        }
+
+        [HttpPost("CreateGame")]
+        public async Task<IActionResult> CreateGame(RankingCreateGameViewModel model)
+        {
+            return HttpResponse(await this._rankingAppService.CreateGame(model));
+        }
+        [HttpPost("CreateGameUsingQueue/{TornamentId}")]
+        public async Task<IActionResult> CreateGameBasedQueue(Guid TornamentId)
+        {
+            return HttpResponse(await this._rankingAppService.CreateGameUsingQueue(TornamentId,1));
+        }
+
+        [HttpPut("UpdateGame")]
+        public async Task<IActionResult> UpdateGame(RankingGameDetailViewModel model)
+        {
+            return HttpResponse(await this._rankingAppService.UpdateGame(model));
         }
 
 

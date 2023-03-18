@@ -7,7 +7,7 @@ namespace RankingUp.Tournament.Application.ViewModels
     {
         [Required(ErrorMessage = "Jogador é obrigatório")]
         public Guid PlayerUUId { get; set; }
-        [Required(ErrorMessage = "Ranking é é obrigatório")]
+        [Required(ErrorMessage = "Ranking é obrigatório")]
         public Guid TournamentUUId { get; set; }
 
         public string PlayerName { get; set; }

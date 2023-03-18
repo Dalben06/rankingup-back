@@ -13,16 +13,21 @@ namespace RankingUp.Tournament.Application.Services
     {
         private readonly ITournamentsRepository _tournamentsRepository;
         private readonly ITournamentTeamRepository _tournamentTeamRepository;
+        private readonly ITournamentGameRepository _tournamentGameRepository;
+        private readonly IRankingQueueRepository _rankingQueueRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IPlayerClubsRepository _playerClubsRepository;
         private readonly IMapper _mapper;
 
         public RankingAppService(ITournamentsRepository tournamentsRepository, ITournamentTeamRepository tournamentTeamRepository
+            , ITournamentGameRepository tournamentGameRepository, IRankingQueueRepository rankingQueueRepository
             , IClubRepository clubRepository, IPlayerRepository playerRepository, IPlayerClubsRepository playerClubsRepository, IMapper mapper)
         {
             _tournamentsRepository = tournamentsRepository;
             _tournamentTeamRepository = tournamentTeamRepository;
+            _tournamentGameRepository = tournamentGameRepository;
+            _rankingQueueRepository = rankingQueueRepository;
             _clubRepository = clubRepository;
             _playerRepository = playerRepository;
             _playerClubsRepository = playerClubsRepository;
@@ -42,7 +47,6 @@ namespace RankingUp.Tournament.Application.Services
                 return new RequestResponse<IEnumerable<RankingDetailViewModel>>(ex.Message);
             }
         }
-
         public async Task<RequestResponse<RankingDetailViewModel>> GetRanking(Guid Id)
         {
             try
@@ -56,6 +60,34 @@ namespace RankingUp.Tournament.Application.Services
                 return new RequestResponse<RankingDetailViewModel>(ex.Message);
             }
         }
+        public async Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId)
+        {
+            try
+            {
+                return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(
+                    this._mapper.Map<IEnumerable<RankingPlayerViewModel>>(await _tournamentTeamRepository.GetAllByTournament(RankingId))
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(ex.Message);
+            }
+        }
+        public async Task<RequestResponse<IEnumerable<RankingGameDetailViewModel>>> GetGamesGoing(Guid RankingId)
+        {
+            try
+            {
+                return new RequestResponse<IEnumerable<RankingGameDetailViewModel>>(
+                    this._mapper.Map<IEnumerable<RankingGameDetailViewModel>>(await _tournamentGameRepository.GetGameNotFinishTournamentId(RankingId))
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<RankingGameDetailViewModel>>(ex.Message);
+            }
+        }
+
+
 
         public async Task<RequestResponse<RankingDetailViewModel>> CreateRanking(RankingDetailViewModel model)
         {
@@ -145,6 +177,228 @@ namespace RankingUp.Tournament.Application.Services
             return new NoContentResponse(noticable);
         }
 
+       
+
+        public async Task<RequestResponse<RankingPlayerViewModel>> AddPlayer(RankingPlayerViewModel model)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var team = new TournamentTeam
+                    (await _tournamentsRepository.GetById(model.TournamentUUId),
+                    await _playerRepository.GetById(model.PlayerUUId), true, model.UserId);
+
+                team.Validate();
+                noticable.AddNotifications(team.Notifications);
+                if (team.Tournament?.IsFinish ?? false)
+                    noticable.AddNotification("O Ranking já foi finalizado");
+
+                if(team.Tournament != null && team.Tournament.OnlyClubMembers)
+                {
+                    var playersClub = await _playerClubsRepository.GetPlayerAndClubId(team.Tournament.ClubId, team.TeamId);
+                    if(playersClub is null)
+                        noticable.AddNotification("Esse Ranking somente permite jogadores associados ao clube");
+                }
+
+                if (noticable.Valid)
+                {
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        team = await _tournamentTeamRepository.InsertAsync(team);
+                        await _rankingQueueRepository.InsertAsync(new RankingQueue(team.Tournament, team, model.UserId));
+                        scope.Complete();
+                    }
+                    return new RequestResponse<RankingPlayerViewModel>(_mapper.Map<RankingPlayerViewModel>(await _tournamentTeamRepository.GetById(team.Id)), noticable);
+                }
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new RequestResponse<RankingPlayerViewModel>(noticable);
+        }
+        public async Task<RequestResponse<RankingGameDetailViewModel>> CreateGame(RankingCreateGameViewModel model)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var game = new TournamentGame(
+                    (await _tournamentTeamRepository.GetById(model.TeamOneUUId)),
+                    (await _tournamentTeamRepository.GetById(model.TeamTwoUUId)),
+                    (await _tournamentsRepository.GetById(model.TournamentUUId)), model.UserId);
+
+                game.Validate();
+
+                noticable.AddNotifications(game.Notifications);
+
+                if (game.Tournament?.IsFinish ?? false)
+                    noticable.AddNotification("O Ranking já foi finalizado");
+
+                if(game.Tournament != null)
+                {
+                    var gamePlaying = await _tournamentGameRepository.GetAllGamesByTournamentId(game.Tournament.UUId);
+                    if(gamePlaying !=null && gamePlaying.Count() >= game.Tournament.MatchSameTime)
+                        noticable.AddNotification("O numero maximo de jogos ao mesmo tempo foi atingido");
+                }
+
+                if (noticable.Valid)
+                {
+                    var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(game.Tournament.UUId);
+                    var playerToDeleteInQueue = playersInQueue.Where(p => p.TeamId == game.TeamOneId || p.TeamId == game.TeamTwoId);
+
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        game = await _tournamentGameRepository.InsertAsync(game);
+                        if (playerToDeleteInQueue.Any())
+                        {
+                            foreach (var playerQueue in playerToDeleteInQueue)
+                            {
+                                playerQueue.Disable(model.UserId);
+                                await _rankingQueueRepository.DeleteAsync(playerQueue);
+                            }
+                        }
+                        scope.Complete();
+                    }
+                    return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
+                }
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new RequestResponse<RankingGameDetailViewModel>(noticable);
+        }
+        public async Task<RequestResponse<RankingGameDetailViewModel>> CreateGameUsingQueue(Guid TournamentId, int UseId)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(TournamentId);
+                if (!playersInQueue.Any() && playersInQueue.Count() <= 1)
+                    throw new Exception("Não há jogadores suficientes na Fila");
+
+                var games = await this._tournamentGameRepository.GetAllGamesByTournamentId(TournamentId);
+                var team1 = playersInQueue.First().Team;
+
+                TournamentTeam team2 = null;
+                int gamesPlayedWithTeam1 = int.MaxValue;
+                foreach (var rankingQueue in playersInQueue.Where(x => x.TeamId != team1.Id))
+                {
+                    var gamesPlayeds = games.Where(x => x.TeamOneId == rankingQueue.TeamId || x.TeamTwoId == rankingQueue.TeamId);
+                    if (!gamesPlayeds.Any())
+                    {
+                        gamesPlayedWithTeam1 = 0;
+                        team2 = rankingQueue.Team;
+                        break;
+                    }
+                    var gamesWithTeam1 = games.Where(x => x.TeamOneId == rankingQueue.TeamId || x.TeamTwoId == team1.Id).Count();
+                    gamesWithTeam1 += games.Where(x => x.TeamTwoId == rankingQueue.TeamId || x.TeamOneId == team1.Id).Count();
+                    
+                    if(gamesWithTeam1 < gamesPlayedWithTeam1)
+                    {
+                        gamesPlayedWithTeam1 = gamesWithTeam1;
+                        team2 = rankingQueue.Team;
+                    }
+                }
+
+                var game = new TournamentGame(
+                    team1,
+                    team2,
+                    (await _tournamentsRepository.GetById(TournamentId)), UseId);
+
+                game.Validate();
+                noticable.AddNotifications(game.Notifications);
+
+                if (game.Tournament?.IsFinish ?? false)
+                    noticable.AddNotification("O Ranking já foi finalizado");
+
+                if (game.Tournament != null)
+                {
+                    var gamePlaying = await _tournamentGameRepository.GetAllGamesByTournamentId(game.Tournament.UUId);
+                    if (gamePlaying != null && gamePlaying.Count() >= game.Tournament.MatchSameTime)
+                        noticable.AddNotification("O numero maximo de jogos ao mesmo tempo foi atingido");
+                }
+
+                if (noticable.Valid)
+                {
+                    var playerToDeleteInQueue = playersInQueue.Where(p => p.TeamId == game.TeamOneId || p.TeamId == game.TeamTwoId);
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        game = await _tournamentGameRepository.InsertAsync(game);
+                        if (playerToDeleteInQueue.Any())
+                        {
+                            foreach (var playerQueue in playerToDeleteInQueue)
+                            {
+                                playerQueue.Disable(UseId);
+                                await _rankingQueueRepository.DeleteAsync(playerQueue);
+                            }
+                        }
+                        scope.Complete();
+                    }
+                    return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
+                }
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new RequestResponse<RankingGameDetailViewModel>(noticable);
+        }
+
+
+
+        public async Task<RequestResponse<RankingGameDetailViewModel>> UpdateGame(RankingGameDetailViewModel model)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var orig = await _tournamentGameRepository.GetById(model.UUId);
+                if (orig is null)
+                    throw new Exception("Jogo não encontrado!");
+
+                var game = new TournamentGame(model.TeamOneGamePoints,model.TeamTwoGamePoints,
+                    orig.TeamOne,
+                    orig.TeamTwo,
+                    (await _tournamentsRepository.GetById(orig.TournamentId)),
+                    model.UserId, model.IsFinished);
+
+                game.Validate();
+                noticable.AddNotifications(game.Notifications);
+
+                if (game.Tournament?.IsFinish ?? false)
+                    noticable.AddNotification("O Ranking já foi finalizado");
+
+                if (noticable.Valid)
+                {
+                    game.Id = orig.Id;
+                    game.UUId = orig.UUId;
+                    var addPlayerToQueueAgain = new List<RankingQueue>();
+                    if (game.IsFinished && !orig.IsFinished)
+                    {
+                        addPlayerToQueueAgain.Add(new RankingQueue(game.Tournament, game.Winner, model.UserId));
+                        addPlayerToQueueAgain.Add(new RankingQueue(game.Tournament, game.Loser, model.UserId));
+                    }
+
+
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        await _tournamentGameRepository.UpdateAsync(game);
+                        if (addPlayerToQueueAgain.Any())
+                        {
+                            foreach (var playerQueue in addPlayerToQueueAgain)
+                                await this._rankingQueueRepository.InsertAsync(playerQueue);
+                        }
+                        scope.Complete();
+                    }
+                    return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
+                }
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new RequestResponse<RankingGameDetailViewModel>(noticable);
+        }
         public async Task<RequestResponse<RankingDetailViewModel>> UpdateRanking(RankingDetailViewModel model)
         {
             var noticable = new Notifiable();
@@ -179,6 +433,8 @@ namespace RankingUp.Tournament.Application.Services
             }
             return new RequestResponse<RankingDetailViewModel>(noticable);
         }
+
+
         public async Task<NoContentResponse> RemoveRanking(Guid Id, int UseId)
         {
             var noticable = new Notifiable();
@@ -188,6 +444,10 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (orig is null)
                     throw new Exception("Ranking não encontrado!");
+
+                var GamePending = await _tournamentGameRepository.GetGameNotFinishTournamentId(orig.UUId);
+                if (GamePending is not null && GamePending.Any())
+                    noticable.AddNotification("Não é possivel finalizar um ranking com partidas em andamento!");
 
                 orig.Disable(UseId);
                 if (noticable.Valid)
@@ -205,7 +465,6 @@ namespace RankingUp.Tournament.Application.Services
             }
             return new NoContentResponse(noticable);
         }
-
         public async Task<NoContentResponse> RemovePlayer(Guid Id, int UseId)
         {
             var noticable = new Notifiable();
@@ -215,6 +474,10 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (orig is null)
                     throw new Exception("Jogador não encontrado!");
+
+                var playerIsPlaying = await _tournamentGameRepository.GetGameNotFinishByTeamAndTournamentId(orig.Tournament.UUId, orig.UUId);
+                if (playerIsPlaying != null)
+                    noticable.AddNotification("Não pode remover um jogador em uma partida em andamento!");
 
                 orig.Disable(UseId);
                 if (noticable.Valid)
@@ -231,58 +494,6 @@ namespace RankingUp.Tournament.Application.Services
                 noticable.AddNotification(ex.Message);
             }
             return new NoContentResponse(noticable);
-        }
-
-        public async Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId)
-        {
-            try
-            {
-                return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(
-                    this._mapper.Map<IEnumerable<RankingPlayerViewModel>>(await _tournamentTeamRepository.GetAllByTournament(RankingId))
-                    , new Notifiable());
-            }
-            catch (Exception ex)
-            {
-                return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(ex.Message);
-            }
-        }
-
-        public async Task<RequestResponse<RankingPlayerViewModel>> AddPlayer(RankingPlayerViewModel model)
-        {
-            var noticable = new Notifiable();
-            try
-            {
-                var team = new TournamentTeam
-                    (await _tournamentsRepository.GetById(model.TournamentUUId),
-                    await _playerRepository.GetById(model.PlayerUUId), true, model.UserId);
-
-                team.Validate();
-                noticable.AddNotifications(team.Notifications);
-                if (team.Tournament?.IsFinish ?? false)
-                    noticable.AddNotification("O Ranking já foi finalizado");
-
-                if(team.Tournament != null && team.Tournament.OnlyClubMembers)
-                {
-                    var playersClub = await _playerClubsRepository.GetPlayerAndClubId(team.Tournament.ClubId, team.TeamId);
-                    if(playersClub is null)
-                        noticable.AddNotification("Esse Ranking somente permite jogadores associados ao clube");
-                }
-
-                if (noticable.Valid)
-                {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
-                        team = await _tournamentTeamRepository.InsertAsync(team);
-                        scope.Complete();
-                    }
-                    return new RequestResponse<RankingPlayerViewModel>(_mapper.Map<RankingPlayerViewModel>(await _tournamentTeamRepository.GetById(team.Id)), noticable);
-                }
-            }
-            catch (Exception ex)
-            {
-                noticable.AddNotification(ex.Message);
-            }
-            return new RequestResponse<RankingPlayerViewModel>(noticable);
         }
     }
 }

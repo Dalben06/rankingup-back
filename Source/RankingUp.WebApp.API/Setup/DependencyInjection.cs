@@ -70,6 +70,8 @@ namespace RankingUp.WebApp.API.Setup
         {
             services.AddScoped<ITournamentsRepository, TournamentsRepository>();
             services.AddScoped<ITournamentTeamRepository, TournamentTeamRepository>();
+            services.AddScoped<ITournamentGameRepository, TournamentGameRepository>();
+            services.AddScoped<IRankingQueueRepository, RankingQueueRepository>();
             services.AddScoped<IRankingAppService, RankingAppService>();
         }
     }
