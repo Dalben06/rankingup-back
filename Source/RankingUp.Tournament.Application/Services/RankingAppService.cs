@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using RankingUp.Club.Domain.IRepositories;
+using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
 using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.ViewModels;
 using RankingUp.Tournament.Domain.Entities;
+using RankingUp.Tournament.Domain.Events;
 using RankingUp.Tournament.Domain.Repositories;
 using System.Transactions;
 
@@ -19,10 +21,11 @@ namespace RankingUp.Tournament.Application.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IPlayerClubsRepository _playerClubsRepository;
         private readonly IMapper _mapper;
+        private readonly IMediatorHandler _mediatorHandler;
 
         public RankingAppService(ITournamentsRepository tournamentsRepository, ITournamentTeamRepository tournamentTeamRepository
             , ITournamentGameRepository tournamentGameRepository, IRankingQueueRepository rankingQueueRepository
-            , IClubRepository clubRepository, IPlayerRepository playerRepository, IPlayerClubsRepository playerClubsRepository, IMapper mapper)
+            , IClubRepository clubRepository, IPlayerRepository playerRepository, IPlayerClubsRepository playerClubsRepository, IMapper mapper, IMediatorHandler mediatorHandler)
         {
             _tournamentsRepository = tournamentsRepository;
             _tournamentTeamRepository = tournamentTeamRepository;
@@ -32,6 +35,7 @@ namespace RankingUp.Tournament.Application.Services
             _playerRepository = playerRepository;
             _playerClubsRepository = playerClubsRepository;
             _mapper = mapper;
+            _mediatorHandler = mediatorHandler;
         }
 
         public async Task<RequestResponse<IEnumerable<RankingDetailViewModel>>> GetAllRankings()
@@ -109,8 +113,12 @@ namespace RankingUp.Tournament.Application.Services
                         rank = await _tournamentsRepository.InsertAsync(rank);
                         scope.Complete();
                     }
+                    if (rank.IsStart)
+                        await _mediatorHandler.PublishDomainEvent(new RankingStartedEvent(rank.UUId, rank.CreatePersonId));
+
                     return new RequestResponse<RankingDetailViewModel>(_mapper.Map<RankingDetailViewModel>(await _tournamentsRepository.GetById(rank.Id)), noticable);
                 }
+
             }
             catch (Exception ex)
             {
@@ -142,6 +150,7 @@ namespace RankingUp.Tournament.Application.Services
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new RankingStartedEvent(orig.UUId, UseId));
                 }
             }
             catch (Exception ex)
@@ -168,6 +177,7 @@ namespace RankingUp.Tournament.Application.Services
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new RankingEndedEvent(orig.UUId, UseId));
                 }
             }
             catch (Exception ex)
@@ -205,9 +215,9 @@ namespace RankingUp.Tournament.Application.Services
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         team = await _tournamentTeamRepository.InsertAsync(team);
-                        await _rankingQueueRepository.InsertAsync(new RankingQueue(team.Tournament, team, model.UserId));
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new PlayerInRankingEvent(team.UUId,team.Tournament.UUId,model.UserId,Domain.Enums.PlayerRankingActionEnum.Added));
                     return new RequestResponse<RankingPlayerViewModel>(_mapper.Map<RankingPlayerViewModel>(await _tournamentTeamRepository.GetById(team.Id)), noticable);
                 }
             }
@@ -243,22 +253,12 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (noticable.Valid)
                 {
-                    var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(game.Tournament.UUId);
-                    var playerToDeleteInQueue = playersInQueue.Where(p => p.TeamId == game.TeamOneId || p.TeamId == game.TeamTwoId);
-
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         game = await _tournamentGameRepository.InsertAsync(game);
-                        if (playerToDeleteInQueue.Any())
-                        {
-                            foreach (var playerQueue in playerToDeleteInQueue)
-                            {
-                                playerQueue.Disable(model.UserId);
-                                await _rankingQueueRepository.DeleteAsync(playerQueue);
-                            }
-                        }
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new RankingGameCreatedEvent(game.UUId, game.Tournament.UUId, game.TeamOne.UUId, game.TeamTwo.UUId,game.CreatePersonId));
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
                 }
             }
@@ -321,20 +321,12 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (noticable.Valid)
                 {
-                    var playerToDeleteInQueue = playersInQueue.Where(p => p.TeamId == game.TeamOneId || p.TeamId == game.TeamTwoId);
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         game = await _tournamentGameRepository.InsertAsync(game);
-                        if (playerToDeleteInQueue.Any())
-                        {
-                            foreach (var playerQueue in playerToDeleteInQueue)
-                            {
-                                playerQueue.Disable(UseId);
-                                await _rankingQueueRepository.DeleteAsync(playerQueue);
-                            }
-                        }
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new RankingGameCreatedEvent(game.UUId, game.Tournament.UUId, game.TeamOne.UUId, game.TeamTwo.UUId, game.CreatePersonId));
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
                 }
             }
@@ -372,24 +364,12 @@ namespace RankingUp.Tournament.Application.Services
                 {
                     game.Id = orig.Id;
                     game.UUId = orig.UUId;
-                    var addPlayerToQueueAgain = new List<RankingQueue>();
-                    if (game.IsFinished && !orig.IsFinished)
-                    {
-                        addPlayerToQueueAgain.Add(new RankingQueue(game.Tournament, game.Winner, model.UserId));
-                        addPlayerToQueueAgain.Add(new RankingQueue(game.Tournament, game.Loser, model.UserId));
-                    }
-
-
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentGameRepository.UpdateAsync(game);
-                        if (addPlayerToQueueAgain.Any())
-                        {
-                            foreach (var playerQueue in addPlayerToQueueAgain)
-                                await this._rankingQueueRepository.InsertAsync(playerQueue);
-                        }
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new RankingGameUpdatedEvent(game.UUId, game.Tournament.UUId, game.IsFinished, game.TeamOne.UUId, game.TeamTwo.UUId, game.UpdatePersonId));
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
                 }
             }
@@ -487,6 +467,7 @@ namespace RankingUp.Tournament.Application.Services
                         await _tournamentTeamRepository.DeleteAsync(orig);
                         scope.Complete();
                     }
+                    await _mediatorHandler.PublishDomainEvent(new PlayerInRankingEvent(orig.UUId, orig.Tournament.UUId, UseId, Domain.Enums.PlayerRankingActionEnum.Deleted));
                 }
             }
             catch (Exception ex)

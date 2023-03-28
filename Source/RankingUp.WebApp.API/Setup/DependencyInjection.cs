@@ -1,6 +1,8 @@
-﻿using RankingUp.Club.Application.Services;
+﻿using Microsoft.AspNetCore.Hosting;
+using RankingUp.Club.Application.Services;
 using RankingUp.Club.Data.Repositories;
 using RankingUp.Club.Domain.IRepositories;
+using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Configuration;
 using RankingUp.Core.Data;
 using RankingUp.Player.Application.Services;
@@ -12,6 +14,7 @@ using RankingUp.Sport.Domain.Repositories;
 using RankingUp.Tournament.Application.Services;
 using RankingUp.Tournament.Data.Repositories;
 using RankingUp.Tournament.Domain.Repositories;
+using System.Reflection;
 
 namespace RankingUp.WebApp.API.Setup
 {
@@ -36,6 +39,8 @@ namespace RankingUp.WebApp.API.Setup
         {
             services.AddDapperConfig();
             services.AddAutoMapperConfiguration();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+            services.AddScoped<IMediatorHandler, MediatorHandler>();
         }
         private static void RegisterCore(this IServiceCollection services)
         {
