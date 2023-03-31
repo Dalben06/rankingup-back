@@ -21,7 +21,7 @@ namespace RankingUp.Sport.Data.Repositories
         }
 
         public Task<IEnumerable<Sports>> GetAll() =>  _baseRepository.GetAsync<Sports>(GetDefaultSql());
-        public Task<IEnumerable<Sports>> GetByIds(Guid[] Id) => _baseRepository.GetAsync<Sports>(GetDefaultSql() + " AND  sports.Id in @Id", new {Id});
+        public Task<IEnumerable<Sports>> GetByIds(Guid[] Id) => _baseRepository.GetAsync<Sports>(GetDefaultSql() + " AND  sports.UUId in @Id", new {Id});
         public Task<Sports> GetById(Guid Id) => _baseRepository.GetByIdAsync<Sports>(GetDefaultSql(), Id);
         public Task<Sports> GetById(int Id) => _baseRepository.GetByIdAsync<Sports>(GetDefaultSql(), Id);
 

@@ -10,6 +10,8 @@ namespace RankingUp.Club.Domain.IRepositories
         Task<IEnumerable<Clubs>> GetClubs(Guid[] Id);
         Task<IEnumerable<Clubs>> GetClubAndSportId(Guid ClubId, Guid SportId);
 
+        Task<IEnumerable<Clubs>> GetAll();
+
 
     }
 }

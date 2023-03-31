@@ -37,6 +37,7 @@ namespace RankingUp.Club.Data.Repositories
         public Task<Clubs> GetById(Guid Id) => this._baseRepository.GetByIdAsync<Clubs,Sports>(GetDefaultSql(),Id,SQLMap());
         public Task<Clubs> GetById(int Id) => this._baseRepository.GetByIdAsync<Clubs, Sports>(GetDefaultSql(), Id, SQLMap());
         public Task<IEnumerable<Clubs>> GetClubs(Guid[] Id) => this._baseRepository.GetAsync<Clubs, Sports>(GetDefaultSql() + " AND Clubs.Id in @Id", SQLMap(), new {Id});
+        public Task<IEnumerable<Clubs>> GetAll() => this._baseRepository.GetAsync<Clubs, Sports>(GetDefaultSql(), SQLMap());
         public Task<Clubs> InsertAsync(Clubs club) => this._baseRepository.InsertAsync<Clubs>(club);
         public Task<bool> UpdateAsync(Clubs entity) => this._baseRepository.UpdateAsync<Clubs>(entity);
         public Task<bool> DeleteAsync(Clubs entity) => this._baseRepository.DeleteAsync<Clubs>(entity);

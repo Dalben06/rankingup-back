@@ -1,12 +1,6 @@
 using RankingUp.WebApp.API.Setup;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddCors(policyBuilder =>
-    policyBuilder.AddDefaultPolicy(policy =>
-        policy.WithOrigins("*").AllowAnyHeader().AllowAnyHeader())
-);
 
 // Add services to the container.
 
@@ -16,6 +10,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.RegisterServices(builder.Configuration);
+builder.Services.AddCors(policyBuilder =>
+    policyBuilder.AddDefaultPolicy(policy =>
+        policy.WithOrigins("*").AllowAnyHeader().AllowAnyHeader())
+);
 
 var app = builder.Build();
 
@@ -24,7 +22,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseCors();
-
 
 app.UseAuthorization();
 
