@@ -16,6 +16,18 @@ namespace RankingUp.WebApp.API.Controllers
             this._clubAppService= clubAppService;
         }
 
+        [HttpGet("GetInicialData")]
+        public async Task<IActionResult> GetInicialData()
+        {
+            return HttpResponse(await this._clubAppService.GetInicialData());
+        }
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            return HttpResponse(await this._clubAppService.GetAll());
+        }
+
         [HttpGet("GetClubsBySport/{Id}")]
         public async Task<IActionResult> GetClubsBySportId(Guid Id)
         {
@@ -30,7 +42,7 @@ namespace RankingUp.WebApp.API.Controllers
 
 
         [HttpPost("CreateClub")]
-        public async Task<IActionResult> CreateClub(ClubDetailViewModel model)
+        public async Task<IActionResult> CreateClub(CreateClubViewModel model)
         {
             return HttpResponse(await this._clubAppService.CreateClub(model));
         }

@@ -3,6 +3,7 @@ using RankingUp.Club.Application.ViewModels;
 using RankingUp.Club.Domain.Entities;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Domain;
+using RankingUp.Sport.Application.ViewModels;
 using RankingUp.Sport.Domain.Entities;
 using RankingUp.Sport.Domain.Repositories;
 using System.Transactions;
@@ -25,6 +26,34 @@ namespace RankingUp.Club.Application.Services
             _mapper = mapper;
             _clubSportRepository = clubSportRepository;
             _sportsRepository = sportsRepository;
+        }
+
+        public async Task<RequestResponse<InicialDataViewModel>> GetInicialData()
+        {
+            try
+            {
+                var result = new InicialDataViewModel
+                {
+                    Sports = _mapper.Map<IEnumerable<SportViewModel>>(await _sportsRepository.GetAll())
+                };
+                return new RequestResponse<InicialDataViewModel>(result, new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<InicialDataViewModel>(ex.Message);
+            }
+        }
+
+        public async Task<RequestResponse<IEnumerable<ClubViewModel>>> GetAll()
+        {
+            try
+            {
+                return new RequestResponse<IEnumerable<ClubViewModel>>(this._mapper.Map<IEnumerable<ClubViewModel>>(await _clubRepository.GetAll()), new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<ClubViewModel>>(ex.Message);
+            }
         }
 
         public async Task<RequestResponse<ClubDetailViewModel>> GetClubById(Guid Id)
@@ -53,7 +82,7 @@ namespace RankingUp.Club.Application.Services
             }
         }
 
-        public async Task<RequestResponse<ClubDetailViewModel>> CreateClub(ClubDetailViewModel clubDetailViewModel)
+        public async Task<RequestResponse<ClubDetailViewModel>> CreateClub(CreateClubViewModel clubDetailViewModel)
         {
             var noticable = new Notifiable();
             try
@@ -61,21 +90,19 @@ namespace RankingUp.Club.Application.Services
                 var club = _mapper.Map<Clubs>(clubDetailViewModel);
                 noticable.AddNotifications(club.Notifications);
 
-
                 IEnumerable<Sports> sports = Enumerable.Empty<Sports>();
-                if (sports.Any())
-                    sports = await _sportsRepository.GetByIds(club.Sports.Select(x => x.UUId).ToArray());
+                if (clubDetailViewModel.SportsUUId.Any())
+                    sports = await _sportsRepository.GetByIds(clubDetailViewModel.SportsUUId.ToArray());
 
                 if (noticable.Valid)
                 {
-                    
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         club = await _clubRepository.InsertAsync(club);
-                        if (club.Sports != null && club.Sports.Any())
+                        if (sports.Any())
                         {
-                            foreach (var sport in club.Sports)
-                                await _clubSportRepository.InsertAsync(new ClubSport(club.Id, sports.FirstOrDefault(sport => sport.UUId == sport.UUId).Id, club.CreatePersonId));
+                            foreach (var sport in sports)
+                                await _clubSportRepository.InsertAsync(new ClubSport(club.Id,sport.Id, club.CreatePersonId));
                         }
                         scope.Complete();
                     }
@@ -224,5 +251,7 @@ namespace RankingUp.Club.Application.Services
             }
             return new NoContentResponse(noticable);
         }
+
+        
     }
 }
