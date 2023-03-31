@@ -3,6 +3,11 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(policyBuilder =>
+    policyBuilder.AddDefaultPolicy(policy =>
+        policy.WithOrigins("*").AllowAnyHeader().AllowAnyHeader())
+);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -18,6 +23,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
+app.UseCors();
 
 
 app.UseAuthorization();
