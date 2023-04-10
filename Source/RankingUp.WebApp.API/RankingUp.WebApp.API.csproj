@@ -29,4 +29,8 @@
     <ProjectReference Include="..\RankingUp.Tournament.Domain\RankingUp.Tournament.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="HubConfig\" />
+  </ItemGroup>
+
 </Project>

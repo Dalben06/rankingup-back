@@ -10,5 +10,10 @@ namespace RankingUp.Tournament.Application.Hubs
             await Clients.Caller.SendAsync("joinned", "OK");
         }
 
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            return base.OnDisconnectedAsync(exception);
+        }
     }
 }

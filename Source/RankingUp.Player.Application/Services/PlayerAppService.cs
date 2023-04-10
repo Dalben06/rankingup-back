@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using RankingUp.Club.Domain.Entities;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Domain;
 using RankingUp.Player.Application.ViewModel;
 using RankingUp.Player.Domain.Entities;
 using RankingUp.Player.Domain.IRepositories;
+using RankingUp.Sport.Domain.Entities;
 using RankingUp.Sport.Domain.Repositories;
 using System.Transactions;
 
@@ -78,12 +80,30 @@ namespace RankingUp.Player.Application.Services
             {
                 var player = _mapper.Map<Players>(playerModel);
                 noticable.AddNotifications(player.Notifications);
+                Clubs club = null;
+                Sports sport = null;
+
+                if (playerModel.ClubUUId != Guid.Empty)
+                    club = await _clubRepository.GetById(playerModel.ClubUUId);
+
+                if (playerModel.SportUUId != Guid.Empty)
+                    sport = await _sportsRepository.GetById(playerModel.SportUUId);
+                else if(club != null && club.Sports != null && club.Sports.Any())
+                    sport = club.Sports.FirstOrDefault();
+
+
 
                 if (noticable.Valid)
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         player = await _playerRepository.InsertAsync(player);
+                        if(club != null)
+                            await _playerClubsRepository.InsertAsync(new PlayerClubs(true, player.CreatePersonId, club, player));
+
+                        if(sport != null) 
+                            await _playerSportsRepository.InsertAsync(new PlayerSports(true, player.CreatePersonId, sport, player));
+
                         scope.Complete();
                     }
                     return new RequestResponse<PlayerViewModel>(_mapper.Map<PlayerViewModel>(await _playerRepository.GetById(player.Id)), noticable);

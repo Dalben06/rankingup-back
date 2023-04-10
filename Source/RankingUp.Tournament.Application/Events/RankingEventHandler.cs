@@ -111,7 +111,7 @@ namespace RankingUp.Tournament.Application.Events
                    notification.UUId,
                    SignalrRankingEventType.RankingStarted,
                    _mapper.Map<RankingDetailViewModel>(tournament));
-                await this._hubContext.Clients.Groups(notification.UUId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
+                await this._hubContext.Clients.Group(notification.UUId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
 
                 if (tournament.AutoQueue)
                 {
@@ -140,6 +140,7 @@ namespace RankingUp.Tournament.Application.Events
                    SignalrRankingEventType.RankingFinished,
                    _mapper.Map<RankingDetailViewModel>(tournament));
                 await this._hubContext.Clients.Groups(notification.UUId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
+                
 
                 var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(notification.UUId);
                 using (var scope = new TransactionScope())

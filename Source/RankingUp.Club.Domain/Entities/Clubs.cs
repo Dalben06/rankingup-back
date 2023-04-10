@@ -1,5 +1,6 @@
 ﻿using Dapper.Contrib.Extensions;
 using RankingUp.Core.Domain;
+using RankingUp.Core.Extensions;
 using RankingUp.Sport.Domain.Entities;
 
 namespace RankingUp.Club.Domain.Entities
@@ -48,7 +49,7 @@ namespace RankingUp.Club.Domain.Entities
             City = city;
             State = state;
             Country = country;
-            Phone = phone;
+            Phone = phone.OnlyNumbers();
             PostalCode = postalCode;
             BusinessHourStart = startHour;
             BusinessHourEnd = endHour;

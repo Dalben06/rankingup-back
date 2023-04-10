@@ -7,7 +7,7 @@ namespace RankingUp.WebApp.API.Setup
 
         public static void MapHubs(this WebApplication app)
         {
-            app.MapHub<RankingHub>("/rankinghub");
+            app.MapHub<RankingHub>("/api/rankinghub");
         }
 
     }

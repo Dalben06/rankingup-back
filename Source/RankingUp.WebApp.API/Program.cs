@@ -26,5 +26,5 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHubs();
 app.Run();

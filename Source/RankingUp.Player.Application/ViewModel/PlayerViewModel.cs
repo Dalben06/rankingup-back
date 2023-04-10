@@ -13,6 +13,9 @@ namespace RankingUp.Player.Application.ViewModel
         [Required(ErrorMessage = "O Descrição é obrigatório")]
         [StringLength(100, ErrorMessage = "O Descrição pode ter no máximo {1} caracteres")]
         public string Description { get; set; }
+        [Required(ErrorMessage = "O Telefone do Jogador é obrigatório")]
+        [StringLength(20, ErrorMessage = "O Telefone do Jogador pode ter no máximo {1} caracteres")]
+        public string Phone { get; set; }
         public IEnumerable<ClubViewModel> Clubs { get; set; }
         public IEnumerable<SportViewModel> Sports { get; set; }
 

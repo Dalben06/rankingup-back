@@ -1,4 +1,5 @@
-﻿using RankingUp.Core.ViewModels;
+﻿using Dapper.Contrib.Extensions;
+using RankingUp.Core.ViewModels;
 using System.ComponentModel.DataAnnotations;
 
 namespace RankingUp.Tournament.Application.ViewModels
@@ -44,6 +45,8 @@ namespace RankingUp.Tournament.Application.ViewModels
         public decimal Longitude { get; set; }
         public bool AutoQueue { get; set; }
         public bool HasNotificationToPlayer { get; set; }
+        public bool IsStart { get; set; }
+        public bool IsFinish { get; set; }
 
 
     }

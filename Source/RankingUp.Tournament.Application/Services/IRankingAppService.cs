@@ -1,4 +1,4 @@
-﻿using RankingUp.Core.Domain;
+﻿    using RankingUp.Core.Domain;
 using RankingUp.Tournament.Application.ViewModels;
 
 namespace RankingUp.Tournament.Application.Services
@@ -8,6 +8,7 @@ namespace RankingUp.Tournament.Application.Services
         Task<RequestResponse<IEnumerable<RankingDetailViewModel>>> GetAllRankings();
         Task<RequestResponse<RankingDetailViewModel>> GetRanking(Guid Id);
         Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId);
+        Task<RequestResponse<IEnumerable<RankingPlayerQueueViewModel>>> GetPlayersOnQueue(Guid RankingId);
         Task<RequestResponse<IEnumerable<RankingGameDetailViewModel>>> GetGamesGoing(Guid RankingId);
 
 

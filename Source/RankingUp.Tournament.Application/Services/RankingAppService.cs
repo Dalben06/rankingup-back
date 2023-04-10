@@ -90,7 +90,19 @@ namespace RankingUp.Tournament.Application.Services
                 return new RequestResponse<IEnumerable<RankingGameDetailViewModel>>(ex.Message);
             }
         }
-
+        public async Task<RequestResponse<IEnumerable<RankingPlayerQueueViewModel>>> GetPlayersOnQueue(Guid RankingId)
+        {
+            try
+            {
+                return new RequestResponse<IEnumerable<RankingPlayerQueueViewModel>>(
+                    this._mapper.Map<IEnumerable<RankingPlayerQueueViewModel>>(await _rankingQueueRepository.GetByTournamentIdOrderByCreateDate(RankingId))
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<RankingPlayerQueueViewModel>>(ex.Message);
+            }
+        }
 
 
         public async Task<RequestResponse<RankingDetailViewModel>> CreateRanking(RankingDetailViewModel model)
@@ -210,6 +222,11 @@ namespace RankingUp.Tournament.Application.Services
                         noticable.AddNotification("Esse Ranking somente permite jogadores associados ao clube");
                 }
 
+                var playerInRanking = await _tournamentTeamRepository.GetAllByTournament(model.TournamentUUId);
+                if(playerInRanking.Any(x=> x.Player.UUId == model.PlayerUUId))
+                    noticable.AddNotification("Jogador já cadastro no Ranking");
+
+
                 if (noticable.Valid)
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -274,7 +291,7 @@ namespace RankingUp.Tournament.Application.Services
             try
             {
                 var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(TournamentId);
-                if (!playersInQueue.Any() && playersInQueue.Count() <= 1)
+                if (!playersInQueue.Any() || playersInQueue.Count() <= 1)
                     throw new Exception("Não há jogadores suficientes na Fila");
 
                 var games = await this._tournamentGameRepository.GetAllGamesByTournamentId(TournamentId);
@@ -476,5 +493,7 @@ namespace RankingUp.Tournament.Application.Services
             }
             return new NoContentResponse(noticable);
         }
+
+       
     }
 }
