@@ -10,6 +10,7 @@ namespace RankingUp.Tournament.Application.Services
         Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId);
         Task<RequestResponse<IEnumerable<RankingPlayerQueueViewModel>>> GetPlayersOnQueue(Guid RankingId);
         Task<RequestResponse<IEnumerable<RankingGameDetailViewModel>>> GetGamesGoing(Guid RankingId);
+        Task<RequestResponse<IEnumerable<RankingDetailViewModel>>> GetRankingsByClub(Guid ClubId);
 
 
         Task<RequestResponse<RankingDetailViewModel>> CreateRanking(RankingDetailViewModel model);

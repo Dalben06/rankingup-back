@@ -7,6 +7,7 @@ namespace RankingUp.Tournament.Domain.Repositories
         , IDeleteRepository<Tournaments>, IGetRepository<Tournaments>
     {
         Task<IEnumerable<Tournaments>> GetAll(bool? isRanking);
+        Task<IEnumerable<Tournaments>> GetAllByClub(Guid isRanking);
 
     }
 }

@@ -104,6 +104,20 @@ namespace RankingUp.Tournament.Application.Services
             }
         }
 
+        public async Task<RequestResponse<IEnumerable<RankingDetailViewModel>>> GetRankingsByClub(Guid ClubId)
+        {
+            try
+            {
+                return new RequestResponse<IEnumerable<RankingDetailViewModel>>(
+                    this._mapper.Map<IEnumerable<RankingDetailViewModel>>(await _tournamentsRepository.GetAllByClub(ClubId))
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<RankingDetailViewModel>>(ex.Message);
+            }
+        }
+
 
         public async Task<RequestResponse<RankingDetailViewModel>> CreateRanking(RankingDetailViewModel model)
         {

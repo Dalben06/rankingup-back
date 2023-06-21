@@ -40,6 +40,12 @@ namespace RankingUp.Tournament.Data.Repositories
 
             return _baseRepository.GetAsync<Tournaments, Clubs>(GetDefaultSql(), SQLMap(), new { isRanking });
         }
+        public Task<IEnumerable<Tournaments>> GetAllByClub(Guid id)
+        {
+            var sql = GetDefaultSql() + " AND Clubs.Id = @id";
+
+            return _baseRepository.GetAsync<Tournaments, Clubs>(GetDefaultSql(), SQLMap(), new { id });
+        }
         public Task<Tournaments> GetById(Guid Id) => _baseRepository.GetByIdAsync<Tournaments, Clubs>(GetDefaultSql(), Id, SQLMap());
         public Task<Tournaments> GetById(int Id) => _baseRepository.GetByIdAsync<Tournaments, Clubs>(GetDefaultSql(), Id, SQLMap());
         public Task<Tournaments> InsertAsync(Tournaments entity) => _baseRepository.InsertAsync<Tournaments>(entity);
