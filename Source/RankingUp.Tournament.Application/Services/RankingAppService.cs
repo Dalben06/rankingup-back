@@ -2,9 +2,11 @@
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
+using RankingUp.Core.ViewModels;
 using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.ViewModels;
 using RankingUp.Tournament.Domain.Entities;
+using RankingUp.Tournament.Domain.Entities.Filters;
 using RankingUp.Tournament.Domain.Events;
 using RankingUp.Tournament.Domain.Repositories;
 using System.Transactions;
@@ -51,6 +53,23 @@ namespace RankingUp.Tournament.Application.Services
                 return new RequestResponse<IEnumerable<RankingDetailViewModel>>(ex.Message);
             }
         }
+
+        public async Task<RequestResponse<PaginationViewModel<RankingDetailViewModel>>> GetRankingByFilter(TournamentFilter filter)
+        {
+            try
+            {
+                var result = this._mapper.Map<Pagination<Tournaments>, PaginationViewModel<RankingDetailViewModel>>(await _tournamentsRepository.GetTournamentsByFilter(filter));
+                return new RequestResponse<PaginationViewModel<RankingDetailViewModel>>(
+                    result
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<PaginationViewModel<RankingDetailViewModel>>(ex.Message);
+            }
+        }
+
+
         public async Task<RequestResponse<RankingDetailViewModel>> GetRanking(Guid Id)
         {
             try
@@ -77,12 +96,18 @@ namespace RankingUp.Tournament.Application.Services
                 return new RequestResponse<IEnumerable<RankingPlayerViewModel>>(ex.Message);
             }
         }
-        public async Task<RequestResponse<IEnumerable<RankingGameDetailViewModel>>> GetGamesGoing(Guid RankingId)
+        public async Task<RequestResponse<IEnumerable<RankingGameDetailViewModel>>> GetGames(Guid RankingId, bool IsFinished = false)
         {
             try
             {
+                if(!IsFinished)
+                    return new RequestResponse<IEnumerable<RankingGameDetailViewModel>>(
+                   this._mapper.Map<IEnumerable<RankingGameDetailViewModel>>(await _tournamentGameRepository.GetGameNotFinishTournamentId(RankingId))
+                   , new Notifiable());
+
+
                 return new RequestResponse<IEnumerable<RankingGameDetailViewModel>>(
-                    this._mapper.Map<IEnumerable<RankingGameDetailViewModel>>(await _tournamentGameRepository.GetGameNotFinishTournamentId(RankingId))
+                    this._mapper.Map<IEnumerable<RankingGameDetailViewModel>>(await _tournamentGameRepository.GetAllGamesByTournamentId(RankingId))
                     , new Notifiable());
             }
             catch (Exception ex)

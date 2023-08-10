@@ -1,7 +1,9 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
+using MySqlX.XDevAPI.Common;
 using RankingUp.Core.Domain;
 using RankingUp.Core.Extensions;
+using RankingUp.Core.Helpers;
 using System.Data;
 using System.Reflection;
 using static Dapper.SqlMapper;
@@ -21,7 +23,7 @@ namespace RankingUp.Core.Data
             if (this._context.DbConnection.State == ConnectionState.Closed || this._context.DbConnection.State == ConnectionState.Broken)
                 this._context.DbConnection.Open();
         }
-        private string ObterTable<T>()
+        private string GetTableName<T>()
         {
             var tableName = typeof(T)?.GetCustomAttribute<TableAttribute>()?.Name;
             if (tableName == null)
@@ -40,28 +42,29 @@ namespace RankingUp.Core.Data
             GC.SuppressFinalize(this);
         }
 
-      
-        //private string GetPaginationSQL<T>(Paginacao<T> pag, string sql)
-        //{
-        //    sql += @$"
-        //        LIMIT {pag.LinhasPorPagina}
-        //        OFFSET {pag.ObterOFFSET()}
-        //    ";
-        //    return sql;
-        //}
 
-        //private async Task<int> SelectCountPaginacaoAsync(string sql)
-        //{
-        //    var spliSQL = sql.Split("FROM");
+        private string GetPaginationSQL<T>(Pagination<T> pag, string sql)
+        {
+            // (CURRENT PAGE - 1) * NUMBER OF RECORDS PER PAGE;
+            sql += @$"
+                LIMIT {pag.ItensPerPage}
+                OFFSET {((pag.CurrentPage - 1) * pag.ItensPerPage)} 
+            ";
+            return sql;
+        }
 
-        //    var sqlCount = @$"
-        //        SELECT COUNT(*) FROM {spliSQL.LastOrDefault()}
-        //    ";
-        //    using (var con = this._context.NewConnection)
-        //    {
-        //        return await con.QueryFirstAsync<int>(sqlCount);
-        //    }
-        //}
+        private async Task<int> SelectCountPaginacaoAsync<T>(string sql, object param)
+        {
+            var spliSQL = sql.Split("FROM");
+
+            var sqlCount = @$"
+                SELECT COUNT( DISTINCT {GetTableName<T>()}.{DapperHelper.GetPropertyKeyName<T>()}) FROM {spliSQL.LastOrDefault()}
+            ";
+            using (var con = this._context.NewConnection)
+            {
+                return await con.QueryFirstAsync<int>(sqlCount, param);
+            }
+        }
 
         #region GetById
 
@@ -71,7 +74,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return await con.QueryFirstAsync<T>(SQL + $" AND {ObterTable<T>()}.Id = @Id", new { Id });
+                    return await con.QueryFirstAsync<T>(SQL + $" AND {GetTableName<T>()}.Id = @Id", new { Id });
                 };
             }
             catch (Exception) { throw; }
@@ -82,7 +85,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -93,7 +96,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -104,7 +107,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -115,7 +118,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -126,7 +129,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {ObterTable<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -138,7 +141,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T>(SQL + $" AND {ObterTable<T>()}.UUId = @UUId", new { UUId }))?.FirstOrDefault();
+                    return (await con.QueryAsync<T>(SQL + $" AND {GetTableName<T>()}.UUId = @UUId", new { UUId }))?.FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -149,7 +152,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId }))?.FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId }))?.FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -160,7 +163,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -171,7 +174,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -182,7 +185,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -193,7 +196,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
-                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {ObterTable<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
+                    return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
             catch (Exception) { throw; }
@@ -299,6 +302,66 @@ namespace RankingUp.Core.Data
                 return this._context.DbConnection.CoreUpdateAsync<T>(entity);
             }
             catch (Exception) { throw; }
+        }
+        #endregion
+
+
+        #region Pagination
+
+        public async Task<Pagination<T>> GetPagination<T>(Filter filter,string sql, object param = null) where T : BaseEntity
+        {
+            var result = new Pagination<T>();
+
+            result.TotalItens = await SelectCountPaginacaoAsync<T>(sql, param);
+
+            if (!filter.Ignore)
+            {
+                result.CurrentPage = filter.CurrentPage;
+                result.ItensPerPage = filter.ItensPerPage;
+            }
+            else
+            {
+                result.ItensPerPage = result.TotalItens;
+                result.CurrentPage = 1;
+            }
+
+            if (result.TotalItens > 0)
+            {
+                using (var con = this._context.NewConnection)
+                {
+                    result.Datasource = (await con.QueryAsync<T>(GetPaginationSQL<T>(result,sql),param))?.ToList();
+                }
+            }
+            return result;
+
+        }
+
+        public async Task<Pagination<T1>> GetPagination<T1, T2>(Filter filter, string sql, Func<T1, T2, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
+        {
+            var result = new Pagination<T1>();
+
+            result.TotalItens = await SelectCountPaginacaoAsync<T1>(sql, param);
+
+            if (!filter.Ignore)
+            {
+                result.CurrentPage = filter.CurrentPage;
+                result.ItensPerPage = filter.ItensPerPage;
+            }
+            else
+            {
+                result.ItensPerPage = result.TotalItens;
+                result.CurrentPage = 1;
+            }
+
+            if (result.TotalItens > 0)
+            {
+                using (var con = this._context.NewConnection)
+                {
+                    result.Datasource = (await con.QueryAsync<T1,T2,T1>(GetPaginationSQL<T1>(result, sql), map, param))?.ToList();
+                }
+            }
+            return result;
+
         }
         #endregion
     }

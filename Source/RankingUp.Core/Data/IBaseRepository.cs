@@ -1,9 +1,4 @@
 ﻿using RankingUp.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RankingUp.Core.Data
 {
@@ -31,6 +26,12 @@ namespace RankingUp.Core.Data
         Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4, T5>(string SQL,Func<T1, T2, T3, T4, T5, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
         Task<IEnumerable<T1>> GetAsync<T1, T2, T3, T4, T5, T6>(string SQL,Func<T1, T2, T3, T4, T5, T6, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
 
+        Task<Pagination<T>> GetPagination<T>(Filter filter, string SQL, object param = null) where T : BaseEntity;
+        Task<Pagination<T1>> GetPagination<T1, T2>(Filter filter, string SQL, Func<T1, T2, T1> map,object param = null, string splitOn = "Id") where T1 : BaseEntity;
+        //Task<IEnumerable<T1>> GetPagination<T1, T2, T3>(string SQL, Func<T1, T2, T3, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
+        //Task<IEnumerable<T1>> GetPagination<T1, T2, T3, T4>(string SQL, Func<T1, T2, T3, T4, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
+        //Task<IEnumerable<T1>> GetPagination<T1, T2, T3, T4, T5>(string SQL, Func<T1, T2, T3, T4, T5, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
+        //Task<IEnumerable<T1>> GetPagination<T1, T2, T3, T4, T5, T6>(string SQL, Func<T1, T2, T3, T4, T5, T6, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
 
         Task<T> InsertAsync<T>(T entity) where T : BaseEntity;
         Task<bool> UpdateAsync<T>(T entity) where T : BaseEntity;

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using RankingUp.Core.Domain;
+using RankingUp.Core.ViewModels;
 using RankingUp.Tournament.Application.ViewModels;
 using RankingUp.Tournament.Domain.Entities;
 
@@ -27,6 +29,9 @@ namespace RankingUp.Tournament.Application.AutoMapper
 
             CreateMap<RankingQueue,RankingPlayerQueueViewModel > ()
                .ForMember(dest => dest.Player, src => src.MapFrom(src => src.Team.Player.Name ?? ""))
+              .ReverseMap();
+
+            CreateMap<Pagination<Tournaments>, PaginationViewModel<RankingDetailViewModel>>()
               .ReverseMap();
 
         }

@@ -104,6 +104,9 @@ namespace RankingUp.Tournament.Domain.Entities
         [Computed]
         public string CompleteAddress { get { return $"{Address}, {State} - {City}, {PostalCode}. {Country}"; } }
 
+        [Write(false)]
+        public decimal? Distance { get; set; }
+
 
         public void SetClub(Clubs clubs)
         {

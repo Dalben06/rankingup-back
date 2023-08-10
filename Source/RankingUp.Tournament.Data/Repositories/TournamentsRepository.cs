@@ -1,7 +1,8 @@
 ﻿using RankingUp.Club.Domain.Entities;
 using RankingUp.Core.Data;
-using RankingUp.Sport.Domain.Entities;
+using RankingUp.Core.Domain;
 using RankingUp.Tournament.Domain.Entities;
+using RankingUp.Tournament.Domain.Entities.Filters;
 using RankingUp.Tournament.Domain.Repositories;
 
 namespace RankingUp.Tournament.Data.Repositories
@@ -31,6 +32,32 @@ namespace RankingUp.Tournament.Data.Repositories
              ";
         }
 
+
+        private string GetDefaultPaginationSql()
+        {
+            return @"
+             SELECT Tournaments.* 
+               ,(
+                   3959 *
+                   acos(cos(radians(37)) * 
+                   cos(radians(Tournaments.latitude)) * 
+                   cos(radians(Tournaments.longitude) - 
+                   radians(-122)) + 
+                   sin(radians(37)) * 
+                   sin(radians(Tournaments.latitude )))
+                ) AS distance,
+              Clubs.*
+              FROM Tournaments
+
+             INNER JOIN Clubs
+             ON Clubs.Id = Tournaments.ClubId
+
+             WHERE 1 = 1
+             AND Tournaments.IsDeleted = 0 
+
+             ";
+        }
+
         public Task<IEnumerable<Tournaments>> GetAll(bool? isRanking) 
         { 
             var sql = GetDefaultSql();
@@ -46,6 +73,28 @@ namespace RankingUp.Tournament.Data.Repositories
 
             return _baseRepository.GetAsync<Tournaments, Clubs>(GetDefaultSql(), SQLMap(), new { id });
         }
+
+        public Task<Pagination<Tournaments>> GetTournamentsByFilter(TournamentFilter filter)
+        {
+            var sql = GetDefaultPaginationSql();
+
+            sql += @$" AND Tournaments.IsRanking = @IsRanking";
+
+            if(filter.OnlyFinished.HasValue)
+                sql += @$" AND Tournaments.FinishDate {(filter.OnlyFinished.Value ? " NOT ": "")} is null ";
+
+            if (filter.StartDate.HasValue && filter.EndDate.HasValue)
+                sql += @$" AND Tournaments.EventHourStart BETWEEN @StartDate AND @EndDate ";
+
+            //if (filter.RadioDistance.HasValue)
+            //    sql += @" AND Tournaments.latitude = @latitude AND Tournaments.longitude = @latitude AND ";
+
+            if(!string.IsNullOrEmpty(filter.Order) && !string.IsNullOrEmpty(filter.OrderType))
+                sql += $"  ORDER BY tournaments.{filter.Order} {filter.OrderType} ";
+
+            return _baseRepository.GetPagination<Tournaments,Clubs>(filter, sql,SQLMap(), param: filter);
+        }
+
         public Task<Tournaments> GetById(Guid Id) => _baseRepository.GetByIdAsync<Tournaments, Clubs>(GetDefaultSql(), Id, SQLMap());
         public Task<Tournaments> GetById(int Id) => _baseRepository.GetByIdAsync<Tournaments, Clubs>(GetDefaultSql(), Id, SQLMap());
         public Task<Tournaments> InsertAsync(Tournaments entity) => _baseRepository.InsertAsync<Tournaments>(entity);
@@ -71,5 +120,7 @@ namespace RankingUp.Tournament.Data.Repositories
             };
 
         }
+
+        
     }
 }

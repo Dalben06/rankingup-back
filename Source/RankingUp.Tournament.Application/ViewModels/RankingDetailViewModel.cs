@@ -47,6 +47,9 @@ namespace RankingUp.Tournament.Application.ViewModels
         public bool HasNotificationToPlayer { get; set; }
         public bool IsStart { get; set; }
         public bool IsFinish { get; set; }
+        public decimal? Distance { get; set; }
+
+        public string ClubName { get; set; }
 
 
     }

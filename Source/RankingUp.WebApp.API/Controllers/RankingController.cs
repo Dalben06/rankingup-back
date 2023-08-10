@@ -23,6 +23,12 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._rankingAppService.GetAllRankings());
         }
 
+        [HttpPost("GetByFilter")]
+        public async Task<IActionResult> GetByFilter( Tournament.Domain.Entities.Filters.TournamentFilter filter)
+        {
+            return HttpResponse(await this._rankingAppService.GetRankingByFilter(filter));
+        }
+
         [HttpGet("GetRanking/{Id}")]
         public async Task<IActionResult> GetRanking(Guid Id)
         {
@@ -44,7 +50,7 @@ namespace RankingUp.WebApp.API.Controllers
         [HttpGet("GetGamesGoing/{Id}")]
         public async Task<IActionResult> GetGamesGoing(Guid Id)
         {
-            return HttpResponse(await this._rankingAppService.GetGamesGoing(Id));
+            return HttpResponse(await this._rankingAppService.GetGames(Id));
         }
 
         [HttpGet("GetRankingsByClub/{Id}")]
