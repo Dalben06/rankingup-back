@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RankingUp.Tournament.Application.Services;
+using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.ViewModels;
 
 namespace RankingUp.WebApp.API.Controllers
@@ -10,10 +10,16 @@ namespace RankingUp.WebApp.API.Controllers
     {
 
         private readonly IRankingAppService _rankingAppService;
+        private readonly IRankingGameService _rankingGameAppService;
+        private readonly IRankingPlayerService _rankingPlayerAppService;
 
-        public RankingController(IRankingAppService rankingAppService)
+        public RankingController(IRankingAppService rankingAppService,
+                                 IRankingGameService rankingGameService,
+                                 IRankingPlayerService rankingPlayerService)
         {
             _rankingAppService = rankingAppService;
+            _rankingGameAppService = rankingGameService;
+            _rankingPlayerAppService = rankingPlayerService;
         }
 
 
@@ -38,19 +44,31 @@ namespace RankingUp.WebApp.API.Controllers
         [HttpGet("GetPlayers/{Id}")]
         public async Task<IActionResult> GetPlayers(Guid Id)
         {
-            return HttpResponse(await this._rankingAppService.GetPlayers(Id));
+            return HttpResponse(await this._rankingPlayerAppService.GetPlayers(Id));
+        }
+
+        //[HttpGet("GetGame/{Id}")]
+        //public async Task<IActionResult> GetMatches(Guid Id)
+        //{
+        //    return HttpResponse(await this._rankingGameAppService.GetPlayers(Id));
+        //}
+
+        [HttpGet("GetGames/{Id}")]
+        public async Task<IActionResult> GetMatches(Guid Id, bool? isFinished)
+        {
+            return HttpResponse(await this._rankingGameAppService.GetGames(Id,isFinished));
         }
 
         [HttpGet("GetPlayersOnQueue/{Id}")]
         public async Task<IActionResult> GetPlayersOnQueue(Guid Id)
         {
-            return HttpResponse(await this._rankingAppService.GetPlayers(Id));
+            return HttpResponse(await this._rankingPlayerAppService.GetPlayers(Id));
         }
 
         [HttpGet("GetGamesGoing/{Id}")]
         public async Task<IActionResult> GetGamesGoing(Guid Id)
         {
-            return HttpResponse(await this._rankingAppService.GetGames(Id));
+            return HttpResponse(await this._rankingGameAppService.GetGames(Id,false));
         }
 
         [HttpGet("GetRankingsByClub/{Id}")]
@@ -80,24 +98,24 @@ namespace RankingUp.WebApp.API.Controllers
         [HttpPost("AddPlayer")]
         public async Task<IActionResult> AddPlayer(RankingPlayerViewModel model)
         {
-            return HttpResponse(await this._rankingAppService.AddPlayer(model));
+            return HttpResponse(await this._rankingPlayerAppService.AddPlayer(model));
         }
 
         [HttpPost("CreateGame")]
         public async Task<IActionResult> CreateGame(RankingCreateGameViewModel model)
         {
-            return HttpResponse(await this._rankingAppService.CreateGame(model));
+            return HttpResponse(await this._rankingGameAppService.CreateGame(model));
         }
         [HttpPost("CreateGameUsingQueue/{TornamentId}")]
         public async Task<IActionResult> CreateGameBasedQueue(Guid TornamentId)
         {
-            return HttpResponse(await this._rankingAppService.CreateGameUsingQueue(TornamentId,1));
+            return HttpResponse(await this._rankingGameAppService.CreateGameUsingQueue(TornamentId,1));
         }
 
         [HttpPut("UpdateGame")]
         public async Task<IActionResult> UpdateGame(RankingGameDetailViewModel model)
         {
-            return HttpResponse(await this._rankingAppService.UpdateGame(model));
+            return HttpResponse(await this._rankingGameAppService.UpdateGame(model));
         }
 
 
@@ -117,7 +135,7 @@ namespace RankingUp.WebApp.API.Controllers
         [HttpDelete("RemovePlayer/{Id}")]
         public async Task<IActionResult> RemovePlayer(Guid Id)
         {
-            return HttpResponse(await this._rankingAppService.RemovePlayer(Id, 1));
+            return HttpResponse(await this._rankingPlayerAppService.RemovePlayer(Id, 1));
         }
 
     }

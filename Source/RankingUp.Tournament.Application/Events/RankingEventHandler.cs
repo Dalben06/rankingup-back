@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.Hubs;
-using RankingUp.Tournament.Application.Services;
+using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.ViewModels;
 using RankingUp.Tournament.Domain.Entities;
 using RankingUp.Tournament.Domain.Enums;
@@ -33,6 +33,7 @@ namespace RankingUp.Tournament.Application.Events
         private readonly ITournamentGameRepository _tournamentGameRepository;
         private readonly IRankingQueueRepository _rankingQueueRepository;
         private readonly IRankingAppService _rankingAppService;
+        private readonly IRankingGameService _rankingGameService;
         private readonly IHubContext<RankingHub> _hubContext;
         private readonly IMapper _mapper;
 
@@ -42,7 +43,8 @@ namespace RankingUp.Tournament.Application.Events
                                    IRankingQueueRepository rankingQueueRepository, 
                                    IRankingAppService rankingAppService, 
                                    IHubContext<RankingHub> hubContext, 
-                                   IMapper mapper)
+                                   IMapper mapper,
+                                   IRankingGameService rankingGameService)
         {
             _tournamentsRepository = tournamentsRepository;
             _tournamentTeamRepository = tournamentTeamRepository;
@@ -51,6 +53,7 @@ namespace RankingUp.Tournament.Application.Events
             _rankingAppService = rankingAppService;
             _hubContext = hubContext;
             _mapper = mapper;
+            _rankingGameService = rankingGameService;
         }
 
         public async Task Handle(PlayerInRankingEvent notification, CancellationToken cancellationToken)
@@ -94,7 +97,7 @@ namespace RankingUp.Tournament.Application.Events
                 await this._hubContext.Clients.Groups(notification.TournamentUUId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
 
                 if (tournament.AutoQueue && notification.Action == PlayerRankingActionEnum.Added)
-                    await _rankingAppService.CreateGameUsingQueue(notification.TournamentUUId, notification.UserId);
+                    await _rankingGameService.CreateGameUsingQueue(notification.TournamentUUId, notification.UserId);
             }
             catch (Exception)
             {
@@ -119,7 +122,7 @@ namespace RankingUp.Tournament.Application.Events
                     if (playersInQueue.Any())
                     {
                         for (int i = 0; i < playersInQueue.Count(); i += 2)
-                            await _rankingAppService.CreateGameUsingQueue(notification.UUId, notification.UserId);
+                            await _rankingGameService.CreateGameUsingQueue(notification.UUId, notification.UserId);
                     }
                 }
 
@@ -216,7 +219,7 @@ namespace RankingUp.Tournament.Application.Events
                     }
                     
                     if(tornanemt.AutoQueue)
-                        await _rankingAppService.CreateGameUsingQueue(notification.TournamentId, notification.UserId);
+                        await _rankingGameService.CreateGameUsingQueue(notification.TournamentId, notification.UserId);
                 }
                 
 

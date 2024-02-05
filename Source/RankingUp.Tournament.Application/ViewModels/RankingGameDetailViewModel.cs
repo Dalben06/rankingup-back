@@ -24,5 +24,8 @@ namespace RankingUp.Tournament.Application.ViewModels
 
         // TODO retornar a lista de Matches q tiveram
 
+        public string TitleGame => $"{TeamOnePlayerName} vs {TeamTwoPlayerName}";
+        public string TitleGamePoints => $"{TeamOneGamePoints} - {TeamTwoGamePoints}";
+
     }
 }
