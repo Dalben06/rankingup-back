@@ -9,6 +9,7 @@ namespace RankingUp.Tournament.Application.Interfaces
         Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId);
         Task<RequestResponse<IEnumerable<RankingPlayerQueueViewModel>>> GetPlayersOnQueue(Guid RankingId);
 
+        Task<RequestResponse<RankingPlayerViewModel>> AddPlayerQuickly(RankingAddPlayerQuicklyViewModel model);
         Task<RequestResponse<RankingPlayerViewModel>> AddPlayer(RankingPlayerViewModel model);
         Task<NoContentResponse> RemovePlayer(Guid Id, int UseId);
     }

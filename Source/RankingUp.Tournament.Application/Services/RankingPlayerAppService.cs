@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
+using RankingUp.Core.Extensions;
+using RankingUp.Player.Application.Services;
+using RankingUp.Player.Application.ViewModel;
+using RankingUp.Player.Domain.Entities;
 using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.ViewModels;
@@ -21,6 +25,7 @@ namespace RankingUp.Tournament.Application.Services
         private readonly IRankingQueueRepository _rankingQueueRepository;
         private readonly IMapper _mapper;
         private readonly IMediatorHandler _mediatorHandler;
+        private readonly IPlayerAppService _playerAppService;
 
         public RankingPlayerAppService(ITournamentsRepository tournamentsRepository,
                                        ITournamentTeamRepository tournamentTeamRepository,
@@ -29,7 +34,8 @@ namespace RankingUp.Tournament.Application.Services
                                        IPlayerClubsRepository playerClubsRepository,
                                        IRankingQueueRepository rankingQueueRepository,
                                        IMapper mapper,
-                                       IMediatorHandler mediatorHandler)
+                                       IMediatorHandler mediatorHandler,
+                                       IPlayerAppService playerAppService)
         {
             _tournamentsRepository = tournamentsRepository;
             _tournamentTeamRepository = tournamentTeamRepository;
@@ -39,6 +45,7 @@ namespace RankingUp.Tournament.Application.Services
             _rankingQueueRepository = rankingQueueRepository;
             _mapper = mapper;
             _mediatorHandler = mediatorHandler;
+            _playerAppService = playerAppService;
         }
 
         public async Task<RequestResponse<IEnumerable<RankingPlayerViewModel>>> GetPlayers(Guid RankingId)
@@ -142,6 +149,48 @@ namespace RankingUp.Tournament.Application.Services
                 noticable.AddNotification(ex.Message);
             }
             return new NoContentResponse(noticable);
+        }
+
+        public async Task<RequestResponse<RankingPlayerViewModel>> AddPlayerQuickly(RankingAddPlayerQuicklyViewModel model)
+        {
+            var noticable = new Notifiable();
+            try
+            {
+                var addPlayerModel = new RankingPlayerViewModel
+                {
+                    IsActive = true,
+                    TournamentUUId = model.TournamentUUId,
+                    UserId = model.UserId,
+                };
+
+                var existPlayerByNumber = await _playerRepository.GetByPhoneNumber(model.PhoneNumber.OnlyNumbers());
+                if(existPlayerByNumber != null)
+                {
+                    addPlayerModel.PlayerUUId = existPlayerByNumber.UUId;
+                    return await AddPlayer(addPlayerModel);
+                }
+
+                var modelCreatePlayer = new PlayerCreateViewModel 
+                {
+                    ClubUUId = model.ClubUUId ?? Guid.Empty,
+                    Name = model.Name,
+                    Phone = model.PhoneNumber,
+                    UserId = model.UserId,
+                    Description = model.Description,
+                };
+                var resultPlayerCreate = await _playerAppService.CreatePlayer(modelCreatePlayer);
+                noticable.AddNotifications(resultPlayerCreate.Notificacoes.Notifications);
+
+                if (noticable.Invalid) return new RequestResponse<RankingPlayerViewModel>(noticable);
+
+                addPlayerModel.PlayerUUId = resultPlayerCreate.Model.UUId;
+                return await AddPlayer(addPlayerModel);
+            }
+            catch (Exception ex)
+            {
+                noticable.AddNotification(ex.Message);
+            }
+            return new RequestResponse<RankingPlayerViewModel>(noticable);
         }
     }
 }

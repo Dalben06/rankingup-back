@@ -101,6 +101,12 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._rankingPlayerAppService.AddPlayer(model));
         }
 
+        [HttpPost("AddPlayerQuickly")]
+        public async Task<IActionResult> AddPlayerQuickly(RankingAddPlayerQuicklyViewModel model)
+        {
+            return HttpResponse(await this._rankingPlayerAppService.AddPlayerQuickly(model));
+        }
+
         [HttpPost("CreateGame")]
         public async Task<IActionResult> CreateGame(RankingCreateGameViewModel model)
         {

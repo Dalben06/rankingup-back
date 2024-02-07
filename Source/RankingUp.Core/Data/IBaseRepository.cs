@@ -19,6 +19,8 @@ namespace RankingUp.Core.Data
         Task<T1> GetByIdAsync<T1, T2, T3, T4, T5>(string SQL,Guid UUId, Func<T1, T2, T3, T4, T5, T1> map, string splitOn = "Id") where T1 : BaseEntity;
         Task<T1> GetByIdAsync<T1, T2, T3, T4, T5, T6>(string SQL,Guid UUId, Func<T1, T2, T3, T4, T5, T6, T1> map, string splitOn = "Id") where T1 : BaseEntity;
 
+
+
         Task<IEnumerable<T>> GetAsync<T>(string SQL, object param = null) where T : BaseEntity;
         Task<IEnumerable<T1>> GetAsync<T1, T2>(string SQL,Func<T1, T2, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;
         Task<IEnumerable<T1>> GetAsync<T1, T2, T3>(string SQL,Func<T1, T2, T3, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity;

@@ -204,6 +204,22 @@ namespace RankingUp.Core.Data
 
         #endregion
 
+        #region GetFirstOrDefault
+
+        //public Task<T1> GetFirstOrDefaultAsync<T1, T2, T3>(string SQL, Func<T1, T2, T3, T1> map, object param = null, string splitOn = "Id") where T1 : BaseEntity
+        //{
+        //    try
+        //    {
+        //        using (var con = this._context.NewConnection)
+        //        {
+        //            return await con.QueryFirstOrDefault<T1>();
+        //        };
+        //    }
+        //    catch (Exception) { throw; }
+        //}
+
+        #endregion
+
         #region Get
         public async Task<IEnumerable<T>> GetAsync<T>(string SQL, object param = null) where T : BaseEntity
         {
@@ -363,6 +379,8 @@ namespace RankingUp.Core.Data
             return result;
 
         }
+
+        
         #endregion
     }
 }
