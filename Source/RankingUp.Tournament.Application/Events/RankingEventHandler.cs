@@ -2,8 +2,6 @@
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using RankingUp.Club.Domain.IRepositories;
-using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.Hubs;
 using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.ViewModels;
@@ -11,12 +9,6 @@ using RankingUp.Tournament.Domain.Entities;
 using RankingUp.Tournament.Domain.Enums;
 using RankingUp.Tournament.Domain.Events;
 using RankingUp.Tournament.Domain.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using System.Transactions;
 
 namespace RankingUp.Tournament.Application.Events
@@ -32,7 +24,6 @@ namespace RankingUp.Tournament.Application.Events
         private readonly ITournamentTeamRepository _tournamentTeamRepository;
         private readonly ITournamentGameRepository _tournamentGameRepository;
         private readonly IRankingQueueRepository _rankingQueueRepository;
-        private readonly IRankingAppService _rankingAppService;
         private readonly IRankingGameService _rankingGameService;
         private readonly IHubContext<RankingHub> _hubContext;
         private readonly IMapper _mapper;
@@ -41,7 +32,6 @@ namespace RankingUp.Tournament.Application.Events
                                    ITournamentTeamRepository tournamentTeamRepository, 
                                    ITournamentGameRepository tournamentGameRepository, 
                                    IRankingQueueRepository rankingQueueRepository, 
-                                   IRankingAppService rankingAppService, 
                                    IHubContext<RankingHub> hubContext, 
                                    IMapper mapper,
                                    IRankingGameService rankingGameService)
@@ -50,7 +40,6 @@ namespace RankingUp.Tournament.Application.Events
             _tournamentTeamRepository = tournamentTeamRepository;
             _tournamentGameRepository = tournamentGameRepository;
             _rankingQueueRepository = rankingQueueRepository;
-            _rankingAppService = rankingAppService;
             _hubContext = hubContext;
             _mapper = mapper;
             _rankingGameService = rankingGameService;
@@ -173,7 +162,7 @@ namespace RankingUp.Tournament.Application.Events
                    SignalrRankingEventType.GameCreated,
                    _mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(notification.UUId)));
 
-                var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(notification.UUId);
+                var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(notification.TournamentId);
                 var playerToDeleteInQueue = playersInQueue.Where(p => p.Team.UUId == notification.PlayerOneId || p.Team.UUId == notification.PlayerTwoId);
                 if (playerToDeleteInQueue.Any())
                 {
@@ -187,7 +176,7 @@ namespace RankingUp.Tournament.Application.Events
                         scope.Complete();
                     }
                 }
-                await this._hubContext.Clients.Groups(notification.UUId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
+                await this._hubContext.Clients.Groups(notification.TournamentId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
 
             }
             catch (Exception)
@@ -207,7 +196,7 @@ namespace RankingUp.Tournament.Application.Events
                    notification.IsFinished ? SignalrRankingEventType.GameFinished : SignalrRankingEventType.GameUpdated,
                    _mapper.Map<RankingGameDetailViewModel>(game));
 
-                await this._hubContext.Clients.Groups(notification.UUId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
+                await this._hubContext.Clients.Groups(notification.TournamentId.ToString().ToLower()).SendAsync("rankingUpdate", JsonConvert.SerializeObject(signalrEvent));
 
                 if (notification.IsFinished)
                 {

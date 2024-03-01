@@ -59,10 +59,16 @@ namespace RankingUp.Tournament.Application.Services
             var noticable = new Notifiable();
             try
             {
+                var teamOne = _tournamentTeamRepository.GetById(model.TeamOneUUId);
+                var teamTwo = _tournamentTeamRepository.GetById(model.TeamTwoUUId);
+                var ranking = _tournamentsRepository.GetById(model.TournamentUUId);
+
+                await Task.WhenAll(teamOne, teamTwo, ranking);
+
                 var game = new TournamentGame(
-                    (await _tournamentTeamRepository.GetById(model.TeamOneUUId)),
-                    (await _tournamentTeamRepository.GetById(model.TeamTwoUUId)),
-                    (await _tournamentsRepository.GetById(model.TournamentUUId)), model.UserId);
+                    await teamOne,
+                    await teamTwo,
+                    await ranking, model.UserId);
 
                 game.Validate();
 

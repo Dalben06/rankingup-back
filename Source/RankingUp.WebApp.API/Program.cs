@@ -12,7 +12,11 @@ builder.Services.AddSignalR();
 builder.Services.RegisterServices(builder.Configuration);
 builder.Services.AddCors(policyBuilder =>
     policyBuilder.AddDefaultPolicy(policy =>
-        policy.WithOrigins("*").AllowAnyMethod().AllowAnyHeader())
+        policy.WithOrigins("http://localhost:5173")
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials())
+
 );
 
 var app = builder.Build();

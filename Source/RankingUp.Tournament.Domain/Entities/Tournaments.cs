@@ -108,6 +108,12 @@ namespace RankingUp.Tournament.Domain.Entities
         public decimal? Distance { get; set; }
 
 
+        [Computed]
+        public IEnumerable<TournamentGame> Games { get; set; }
+        [Computed]
+        public IEnumerable<TournamentTeam> Teams { get; set; }
+
+
         public void SetClub(Clubs clubs)
         {
             if (clubs == null) return;

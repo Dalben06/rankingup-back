@@ -1,5 +1,4 @@
-﻿using Dapper.Contrib.Extensions;
-using RankingUp.Core.ViewModels;
+﻿using RankingUp.Core.ViewModels;
 using System.ComponentModel.DataAnnotations;
 
 namespace RankingUp.Tournament.Application.ViewModels
@@ -51,6 +50,8 @@ namespace RankingUp.Tournament.Application.ViewModels
 
         public string ClubName { get; set; }
 
+        public IEnumerable<RankingPlayerViewModel> Teams { get; set; }
+        public IEnumerable<RankingGameDetailViewModel> Games { get; set; }
 
     }
 }

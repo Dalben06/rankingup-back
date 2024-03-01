@@ -1,6 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
 using RankingUp.Core.Domain;
-using RankingUp.Player.Domain.Entities;
 
 namespace RankingUp.Tournament.Domain.Entities
 {

@@ -80,9 +80,12 @@ namespace RankingUp.Tournament.Application.Services
             var noticable = new Notifiable();
             try
             {
-                var team = new TournamentTeam
-                    (await _tournamentsRepository.GetById(model.TournamentUUId),
-                    await _playerRepository.GetById(model.PlayerUUId), true, model.UserId);
+
+                var ranking = _tournamentsRepository.GetById(model.TournamentUUId);
+                var player = _playerRepository.GetById(model.PlayerUUId);
+
+                await Task.WhenAll(ranking,player);
+                var team = new TournamentTeam(await ranking,await player, true, model.UserId);
 
                 team.Validate();
                 noticable.AddNotifications(team.Notifications);

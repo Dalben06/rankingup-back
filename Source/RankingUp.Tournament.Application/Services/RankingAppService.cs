@@ -18,18 +18,21 @@ namespace RankingUp.Tournament.Application.Services
     {
         private readonly ITournamentsRepository _tournamentsRepository;
         private readonly ITournamentGameRepository _tournamentGameRepository;
+        private readonly ITournamentTeamRepository _tournamentTeamRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IMapper _mapper;
         private readonly IMediatorHandler _mediatorHandler;
 
         public RankingAppService(ITournamentsRepository tournamentsRepository,
             ITournamentGameRepository tournamentGameRepository,
+            ITournamentTeamRepository tournamentTeamRepository,
             IClubRepository clubRepository,
             IMapper mapper,
             IMediatorHandler mediatorHandler)
         {
             _tournamentsRepository = tournamentsRepository;
             _tournamentGameRepository = tournamentGameRepository;
+            _tournamentTeamRepository = tournamentTeamRepository;
             _clubRepository = clubRepository;
             _mapper = mapper;
             _mediatorHandler = mediatorHandler;
@@ -69,8 +72,18 @@ namespace RankingUp.Tournament.Application.Services
         {
             try
             {
+
+                var result = await _tournamentsRepository.GetById(Id);
+
+                var gamesTask = _tournamentGameRepository.GetAllGamesByTournamentId(Id);
+                var teamsTask = _tournamentTeamRepository.GetAllByTournament(Id);
+
+                await Task.WhenAll(gamesTask, teamsTask);
+
+                result.Games = await gamesTask;
+                result.Teams = await teamsTask;
                 return new RequestResponse<RankingDetailViewModel>(
-                    this._mapper.Map<RankingDetailViewModel>(await _tournamentsRepository.GetById(Id))
+                    this._mapper.Map<RankingDetailViewModel>(result)
                     , new Notifiable());
             }
             catch (Exception ex)
