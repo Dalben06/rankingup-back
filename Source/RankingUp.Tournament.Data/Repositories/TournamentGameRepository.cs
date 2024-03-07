@@ -55,7 +55,7 @@ namespace RankingUp.Tournament.Data.Repositories
 
 
         public Task<IEnumerable<TournamentGame>> GetAllGamesByTournamentId(Guid Id)
-            => _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players>(GetDefaultSql() + " AND Tournaments.UUId = @Id", SQLMap(), new { Id });
+            => _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players>(GetDefaultSql() + " AND Tournaments.UUId = @Id ORDER BY TournamentGames.Id DESC", SQLMap(), new { Id });
 
         public async Task<TournamentGame?> GetGameNotFinishByTeamAndTournamentId(Guid tour, Guid teamId)
         {

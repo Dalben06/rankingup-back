@@ -27,5 +27,8 @@ namespace RankingUp.Tournament.Application.ViewModels
         public string TitleGame => $"{TeamOnePlayerName} vs {TeamTwoPlayerName}";
         public string TitleGamePoints => $"{TeamOneGamePoints} - {TeamTwoGamePoints}";
 
+        public DateTimeOffset CreateDate { get; set; }
+        public DateTimeOffset UpdateDate { get; set; }
+
     }
 }
