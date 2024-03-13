@@ -45,9 +45,9 @@ namespace RankingUp.WebApp.API.Setup
         }
         private static void RegisterCore(this IServiceCollection services)
         {
-            services.AddSingleton<DbContext>();
-            services.AddSingleton<DbFactory>();
-            services.AddSingleton<IBaseRepository, BaseRepository>();
+            services.AddScoped<DbContext>();
+            services.AddScoped<DbFactory>();
+            services.AddScoped<IBaseRepository, BaseRepository>();
         }
 
 

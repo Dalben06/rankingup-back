@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MySqlX.XDevAPI.Common;
 using RankingUp.Core.Domain;
 
 namespace RankingUp.WebApp.API.Controllers
 {
-    public class ApiController : ControllerBase
+    public abstract class ApiController : ControllerBase
     {
         //protected readonly SessaoUsuario _sessaoUsuario;
         public ApiController()

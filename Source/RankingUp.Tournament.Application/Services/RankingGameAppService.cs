@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using MediatR;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
 using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.ViewModels;
+using RankingUp.Tournament.Domain.DomainServices;
 using RankingUp.Tournament.Domain.Entities;
 using RankingUp.Tournament.Domain.Events;
 using RankingUp.Tournament.Domain.Repositories;
@@ -54,6 +56,28 @@ namespace RankingUp.Tournament.Application.Services
                 return new RequestResponse<IEnumerable<RankingGameDetailViewModel>>(ex.Message);
             }
         }
+
+        public async Task<RequestResponse<IEnumerable<RankingTeamViewModel>>> GetRankingPlayers(Guid RankingId)
+        {
+            try
+            {
+                var games = _tournamentGameRepository.GetAllGamesByTournamentId(RankingId);
+                var teams = _tournamentTeamRepository.GetAllByTournament(RankingId);
+
+                await Task.WhenAll(games, teams);
+                var domainService = new RankingTeamDomainService((await games).ToList(), (await teams).ToList());
+
+
+                return new RequestResponse<IEnumerable<RankingTeamViewModel>>(
+                    this._mapper.Map<IEnumerable<RankingTeamViewModel>>(domainService.GetRankingTeams())
+                    , new Notifiable());
+            }
+            catch (Exception ex)
+            {
+                return new RequestResponse<IEnumerable<RankingTeamViewModel>>(ex.Message);
+            }
+        }
+
         public async Task<RequestResponse<RankingGameDetailViewModel>> CreateGame(RankingCreateGameViewModel model)
         {
             var noticable = new Notifiable();
@@ -86,7 +110,7 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         game = await _tournamentGameRepository.InsertAsync(game);
                         scope.Complete();
@@ -102,7 +126,7 @@ namespace RankingUp.Tournament.Application.Services
             return new RequestResponse<RankingGameDetailViewModel>(noticable);
         }
 
-        public async Task<RequestResponse<RankingGameDetailViewModel>> CreateGameUsingQueue(Guid TournamentId, int UseId)
+        public async Task<RequestResponse<RankingGameDetailViewModel>> CreateGameUsingQueue(Guid TournamentId, int UserId)
         {
             var noticable = new Notifiable();
             try
@@ -138,7 +162,7 @@ namespace RankingUp.Tournament.Application.Services
                 var game = new TournamentGame(
                     team1,
                     team2,
-                    (await _tournamentsRepository.GetById(TournamentId)), UseId);
+                    (await _tournamentsRepository.GetById(TournamentId)), UserId);
 
                 game.Validate();
                 noticable.AddNotifications(game.Notifications);
@@ -148,15 +172,21 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (game.Tournament != null)
                 {
-                    var gamePlaying = await _tournamentGameRepository.GetAllGamesByTournamentId(game.Tournament.UUId);
+                    var gamePlaying = await _tournamentGameRepository.GetGameNotFinishTournamentId(game.Tournament.UUId);
                     if (gamePlaying != null && gamePlaying.Count() >= game.Tournament.MatchSameTime)
                         noticable.AddNotification("O numero maximo de jogos ao mesmo tempo foi atingido");
                 }
 
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    var playerToDeleteInQueue = playersInQueue.Where(p => p.Team.UUId == team1.UUId || p.Team.UUId == team2.UUId);
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
+                        foreach (var playerQueue in playerToDeleteInQueue)
+                        {
+                            playerQueue.Disable(UserId);
+                            await _rankingQueueRepository.DeleteAsync(playerQueue);
+                        }
                         game = await _tournamentGameRepository.InsertAsync(game);
                         scope.Complete();
                     }
@@ -198,12 +228,15 @@ namespace RankingUp.Tournament.Application.Services
                 {
                     game.Id = orig.Id;
                     game.UUId = orig.UUId;
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentGameRepository.UpdateAsync(game);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new RankingGameUpdatedEvent(game.UUId, game.Tournament.UUId, game.IsFinished, game.TeamOne.UUId, game.TeamTwo.UUId, game.UpdatePersonId));
+
+                    await _mediatorHandler.PublishDomainEvent(new RankingGameUpdatedEvent(game.UUId, game.Tournament.UUId,
+                            game.IsFinished, game.TeamOne.UUId, game.TeamTwo.UUId, game.UpdatePersonId, !orig.IsFinished && game.IsFinished));
+
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
                 }
             }
@@ -213,5 +246,7 @@ namespace RankingUp.Tournament.Application.Services
             }
             return new RequestResponse<RankingGameDetailViewModel>(noticable);
         }
+
+        
     }
 }

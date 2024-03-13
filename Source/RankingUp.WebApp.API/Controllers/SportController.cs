@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RankingUp.Club.Application.Services;
 using RankingUp.Sport.Application.Services;
 
 namespace RankingUp.WebApp.API.Controllers

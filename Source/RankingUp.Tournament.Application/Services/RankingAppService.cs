@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MySqlX.XDevAPI.Common;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
@@ -6,6 +7,7 @@ using RankingUp.Core.ViewModels;
 using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.ViewModels;
+using RankingUp.Tournament.Domain.DomainServices;
 using RankingUp.Tournament.Domain.Entities;
 using RankingUp.Tournament.Domain.Entities.Filters;
 using RankingUp.Tournament.Domain.Events;
@@ -70,9 +72,10 @@ namespace RankingUp.Tournament.Application.Services
 
         public async Task<RequestResponse<RankingDetailViewModel>> GetRanking(Guid Id)
         {
+            
             try
             {
-
+               
                 var result = await _tournamentsRepository.GetById(Id);
 
                 var gamesTask = _tournamentGameRepository.GetAllGamesByTournamentId(Id);
@@ -82,9 +85,14 @@ namespace RankingUp.Tournament.Application.Services
 
                 result.Games = await gamesTask;
                 result.Teams = await teamsTask;
-                return new RequestResponse<RankingDetailViewModel>(
-                    this._mapper.Map<RankingDetailViewModel>(result)
-                    , new Notifiable());
+                var responseDetail = this._mapper.Map<RankingDetailViewModel>(result);
+                if (result.IsRanking)
+                {
+                    var rankingDomainService = new RankingTeamDomainService(result.Games.ToList(), result.Teams.ToList());
+                    responseDetail.Rankings = this._mapper.Map<List<RankingTeamViewModel>>(rankingDomainService.GetRankingTeams());
+                }
+
+                return new RequestResponse<RankingDetailViewModel>(responseDetail, new Notifiable());
             }
             catch (Exception ex)
             {
@@ -180,7 +188,7 @@ namespace RankingUp.Tournament.Application.Services
                 orig.StartEvent(UseId);
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();
@@ -207,7 +215,7 @@ namespace RankingUp.Tournament.Application.Services
                 orig.FinishEvent(UseId);
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();
@@ -242,7 +250,7 @@ namespace RankingUp.Tournament.Application.Services
                 if (noticable.Valid)
                 {
                     rank.Id = orig.Id;
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentsRepository.UpdateAsync(rank);
                         scope.Complete();
@@ -275,7 +283,7 @@ namespace RankingUp.Tournament.Application.Services
                 orig.Disable(UseId);
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();

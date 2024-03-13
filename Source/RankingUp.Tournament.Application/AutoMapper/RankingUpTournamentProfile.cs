@@ -34,6 +34,11 @@ namespace RankingUp.Tournament.Application.AutoMapper
             CreateMap<Pagination<Tournaments>, PaginationViewModel<RankingDetailViewModel>>()
               .ReverseMap();
 
+
+            CreateMap<RankingTeam, RankingTeamViewModel>()
+               .ForMember(dest => dest.PlayerName, src => src.MapFrom(src => src.Team.Player.Name ?? ""))
+              .ReverseMap();
+
         }
     }
 }

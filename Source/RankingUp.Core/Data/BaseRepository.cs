@@ -18,10 +18,10 @@ namespace RankingUp.Core.Data
             this._context = context;
         }
 
-        public void OpenConnection()
+        private void OpenConnection(IDbConnection con)
         {
-            if (this._context.DbConnection.State == ConnectionState.Closed || this._context.DbConnection.State == ConnectionState.Broken)
-                this._context.DbConnection.Open();
+            if (con.State != ConnectionState.Open)
+                con.Open();
         }
         private string GetTableName<T>()
         {
@@ -62,6 +62,7 @@ namespace RankingUp.Core.Data
             ";
             using (var con = this._context.NewConnection)
             {
+                this.OpenConnection(con);
                 return await con.QueryFirstAsync<int>(sqlCount, param);
             }
         }
@@ -74,6 +75,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return await con.QueryFirstAsync<T>(SQL + $" AND {GetTableName<T>()}.Id = @Id", new { Id });
                 };
             }
@@ -85,6 +87,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
@@ -96,6 +99,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
@@ -107,6 +111,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
@@ -118,6 +123,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @Id", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
@@ -129,6 +135,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {GetTableName<T1>()}.Id = @UUId", map, splitOn: splitOn, param: new { Id })).FirstOrDefault();
                 }
             }
@@ -141,6 +148,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T>(SQL + $" AND {GetTableName<T>()}.UUId = @UUId", new { UUId }))?.FirstOrDefault();
                 }
             }
@@ -152,6 +160,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId }))?.FirstOrDefault();
                 }
             }
@@ -163,6 +172,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
@@ -174,6 +184,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T4, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
@@ -185,6 +196,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T4, T5, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
@@ -196,6 +208,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     return (await con.QueryAsync<T1, T2, T3, T4, T5, T6, T1>(SQL + $" AND {GetTableName<T1>()}.UUId = @UUId", map, splitOn: splitOn, param: new { UUId })).FirstOrDefault();
                 }
             }
@@ -345,6 +358,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     result.Datasource = (await con.QueryAsync<T>(GetPaginationSQL<T>(result,sql),param))?.ToList();
                 }
             }
@@ -373,6 +387,7 @@ namespace RankingUp.Core.Data
             {
                 using (var con = this._context.NewConnection)
                 {
+                    this.OpenConnection(con);
                     result.Datasource = (await con.QueryAsync<T1,T2,T1>(GetPaginationSQL<T1>(result, sql), map, param))?.ToList();
                 }
             }

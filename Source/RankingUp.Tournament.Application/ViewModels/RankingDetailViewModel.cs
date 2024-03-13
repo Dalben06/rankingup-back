@@ -52,6 +52,7 @@ namespace RankingUp.Tournament.Application.ViewModels
 
         public IEnumerable<RankingPlayerViewModel> Teams { get; set; }
         public IEnumerable<RankingGameDetailViewModel> Games { get; set; }
+        public IEnumerable<RankingTeamViewModel> Rankings { get; set; }
 
     }
 }

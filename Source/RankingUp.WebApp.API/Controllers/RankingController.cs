@@ -77,6 +77,12 @@ namespace RankingUp.WebApp.API.Controllers
             return HttpResponse(await this._rankingAppService.GetRankingsByClub(Id));
         }
 
+        [HttpGet("GetRankingPlayers/{Id}")]
+        public async Task<IActionResult> GetRankingPlayers(Guid Id)
+        {
+            return HttpResponse(await this._rankingGameAppService.GetRankingPlayers(Id));
+        }
+
         [HttpPost("CreateRanking")]
         public async Task<IActionResult> CreateRanking(RankingDetailViewModel model)
         {

@@ -77,6 +77,42 @@ namespace RankingUp.Tournament.Domain.Entities
             }
         }
 
+        [Computed]
+        public int WinnerPoints
+        {
+            get
+            {
+                if (!IsFinished)
+                    return 0;
+
+                if (this.TeamOneGamePoints > this.TeamTwoGamePoints)
+                    return TeamOneGamePoints;
+                else if (this.TeamOneGamePoints < this.TeamTwoGamePoints)
+                    return TeamTwoGamePoints;
+                else
+                    return 0;
+            }
+        }
+
+        [Computed]
+        public int LoserPoints
+        {
+            get
+            {
+                if (!IsFinished)
+                    return 0;
+
+                if (this.TeamOneGamePoints > this.TeamTwoGamePoints)
+                    return TeamTwoGamePoints;
+                else if (this.TeamOneGamePoints < this.TeamTwoGamePoints)
+                    return TeamOneGamePoints;
+                else
+                    return 0;
+            }
+        }
+
+
+
         public void SetTournament(Tournaments tour)
         {
             if (tour == null)

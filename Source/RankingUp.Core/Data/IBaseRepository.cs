@@ -4,7 +4,6 @@ namespace RankingUp.Core.Data
 {
     public interface IBaseRepository
     {
-        public void OpenConnection();
 
         Task<T> GetByIdAsync<T>(string SQL,long Id) where T : BaseEntity;
         Task<T1> GetByIdAsync<T1, T2>(string SQL,long Id, Func<T1, T2, T1> map, string splitOn = "Id") where T1 : BaseEntity;

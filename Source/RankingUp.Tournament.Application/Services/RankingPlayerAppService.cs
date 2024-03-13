@@ -106,7 +106,7 @@ namespace RankingUp.Tournament.Application.Services
 
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         team = await _tournamentTeamRepository.InsertAsync(team);
                         scope.Complete();
@@ -139,7 +139,7 @@ namespace RankingUp.Tournament.Application.Services
                 orig.Disable(UseId);
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentTeamRepository.DeleteAsync(orig);
                         scope.Complete();
