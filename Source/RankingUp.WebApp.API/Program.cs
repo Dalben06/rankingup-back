@@ -13,9 +13,9 @@ builder.Services.RegisterServices(builder.Configuration);
 builder.Services.AddCors(policyBuilder =>
     policyBuilder.AddDefaultPolicy(policy =>
         policy.WithOrigins("http://localhost:5173")
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials())
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials())
 
 );
 
