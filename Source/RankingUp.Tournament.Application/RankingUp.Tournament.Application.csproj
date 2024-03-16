@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
+    <ProjectReference Include="..\RankingUp.Player.Application\RankingUp.Player.Application.csproj" />
     <ProjectReference Include="..\RankingUp.Tournament.Domain\RankingUp.Tournament.Domain.csproj" />
   </ItemGroup>
 

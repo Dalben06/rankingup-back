@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using RankingUp.Club.Application.Services;
+﻿using RankingUp.Club.Application.Services;
 using RankingUp.Club.Data.Repositories;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Communication.Mediator;
@@ -12,7 +10,7 @@ using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Sport.Application.Services;
 using RankingUp.Sport.Data.Repositories;
 using RankingUp.Sport.Domain.Repositories;
-using RankingUp.Tournament.Application.Events;
+using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.Services;
 using RankingUp.Tournament.Data.Repositories;
 using RankingUp.Tournament.Domain.Repositories;
@@ -47,9 +45,9 @@ namespace RankingUp.WebApp.API.Setup
         }
         private static void RegisterCore(this IServiceCollection services)
         {
-            services.AddSingleton<DbContext>();
-            services.AddSingleton<DbFactory>();
-            services.AddSingleton<IBaseRepository, BaseRepository>();
+            services.AddScoped<DbContext>();
+            services.AddScoped<DbFactory>();
+            services.AddScoped<IBaseRepository, BaseRepository>();
         }
 
 
@@ -81,6 +79,8 @@ namespace RankingUp.WebApp.API.Setup
             services.AddScoped<ITournamentGameRepository, TournamentGameRepository>();
             services.AddScoped<IRankingQueueRepository, RankingQueueRepository>();
             services.AddScoped<IRankingAppService, RankingAppService>();
+            services.AddScoped<IRankingPlayerService, RankingPlayerAppService>();
+            services.AddScoped<IRankingGameService, RankingGameAppService>();
         }
     }
 }

@@ -14,5 +14,10 @@ namespace RankingUp.Tournament.Domain.Events
             this.Data = data;
         }
 
+        public RankingUpdateSignalr()
+        {
+                
+        }
+
     }
 }

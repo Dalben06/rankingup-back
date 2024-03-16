@@ -96,7 +96,7 @@ namespace RankingUp.Club.Application.Services
 
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         club = await _clubRepository.InsertAsync(club);
                         if (sports.Any())
@@ -133,7 +133,7 @@ namespace RankingUp.Club.Application.Services
                 if (noticable.Valid)
                 {
                     club.Id = orig.Id;
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _clubRepository.UpdateAsync(club);
                         scope.Complete();
@@ -163,7 +163,7 @@ namespace RankingUp.Club.Application.Services
                 if (noticable.Valid)
                 {
                     var sports = (await this._clubSportRepository.GetSportFromClubId(Id)).Select(x => { x.Disable(UserId); return x; });
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         if (sports.Any())
                         {
@@ -205,7 +205,7 @@ namespace RankingUp.Club.Application.Services
 
                 if (noticable.Valid)
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         var result = await _clubSportRepository.InsertAsync(new ClubSport(club.Id, sport.Id, clubDetailViewModel.UserId));
                         viewModel = _mapper.Map<ClubSportViewModel>(await _clubSportRepository.GetById(result.UUId));
@@ -235,7 +235,7 @@ namespace RankingUp.Club.Application.Services
                 if (noticable.Valid)
                 {
 
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
 
                         await _clubSportRepository.DeleteAsync(orig);

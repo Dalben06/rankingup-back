@@ -7,5 +7,7 @@ namespace RankingUp.Player.Domain.IRepositories
         , IDeleteRepository<Players>, IGetRepository<Players>
     {
         Task<IEnumerable<Players>> GetAll();
+
+        Task<Players> GetByPhoneNumber(string phoneNumber);
     }
 }

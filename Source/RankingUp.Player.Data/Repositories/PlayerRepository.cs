@@ -71,5 +71,10 @@ namespace RankingUp.Player.Data.Repositories
 
         }
 
+        public async Task<Players> GetByPhoneNumber(string phoneNumber)
+        {
+            var result = await _baseRepository.GetAsync<Players, Sports, Clubs>(GetDefaultSql() + " AND Players.Phone = @phoneNumber", SQLMap(), new { phoneNumber });
+            return result.FirstOrDefault();
+        }
     }
 }
