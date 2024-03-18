@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using RankingUp.Background.Service.Service;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
 using RankingUp.Core.Extensions;
@@ -111,7 +112,7 @@ namespace RankingUp.Tournament.Application.Services
                         team = await _tournamentTeamRepository.InsertAsync(team);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new PlayerInRankingEvent(team.UUId, team.Tournament.UUId, model.UserId, Domain.Enums.PlayerRankingActionEnum.Added));
+                    QueueTaskEvent.Instance.AddTask(new PlayerInRankingEvent(team.UUId, team.Tournament.UUId, model.UserId, Domain.Enums.PlayerRankingActionEnum.Added));
                     return new RequestResponse<RankingPlayerViewModel>(_mapper.Map<RankingPlayerViewModel>(await _tournamentTeamRepository.GetById(team.Id)), noticable);
                 }
             }
@@ -144,7 +145,7 @@ namespace RankingUp.Tournament.Application.Services
                         await _tournamentTeamRepository.DeleteAsync(orig);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new PlayerInRankingEvent(orig.UUId, orig.Tournament.UUId, UseId, Domain.Enums.PlayerRankingActionEnum.Deleted));
+                    QueueTaskEvent.Instance.AddTask(new PlayerInRankingEvent(orig.UUId, orig.Tournament.UUId, UseId, Domain.Enums.PlayerRankingActionEnum.Deleted));
                 }
             }
             catch (Exception ex)

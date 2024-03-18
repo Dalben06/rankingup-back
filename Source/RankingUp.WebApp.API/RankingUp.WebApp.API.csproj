@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RankingUp.Background.Service\RankingUp.Background.Service.csproj" />
     <ProjectReference Include="..\RankingUp.Club.Application\RankingUp.Club.Application.csproj" />
     <ProjectReference Include="..\RankingUp.Club.Data\RankingUp.Club.Data.csproj" />
     <ProjectReference Include="..\RankingUp.Core\RankingUp.Core.csproj" />
