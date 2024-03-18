@@ -45,11 +45,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Player.Data", "So
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Player.Application", "Source\RankingUp.Player.Application\RankingUp.Player.Application.csproj", "{4B3F4698-EC7C-45DC-9F9C-68ACA34BC8AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RankingUp.Tournament.Domain", "Source\RankingUp.Tournament.Domain\RankingUp.Tournament.Domain.csproj", "{9A229AB6-156C-4FB7-9DD7-68B2316E858F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Tournament.Domain", "Source\RankingUp.Tournament.Domain\RankingUp.Tournament.Domain.csproj", "{9A229AB6-156C-4FB7-9DD7-68B2316E858F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RankingUp.Tournament.Data", "Source\RankingUp.Tournament.Data\RankingUp.Tournament.Data.csproj", "{F9FB29EA-F3A7-418B-81BD-05F911942B14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Tournament.Data", "Source\RankingUp.Tournament.Data\RankingUp.Tournament.Data.csproj", "{F9FB29EA-F3A7-418B-81BD-05F911942B14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RankingUp.Tournament.Application", "Source\RankingUp.Tournament.Application\RankingUp.Tournament.Application.csproj", "{66AB79B8-93D2-450D-AD22-8DC1020F203E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Tournament.Application", "Source\RankingUp.Tournament.Application\RankingUp.Tournament.Application.csproj", "{66AB79B8-93D2-450D-AD22-8DC1020F203E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RankingUp.Background.Service", "Source\RankingUp.Background.Service\RankingUp.Background.Service.csproj", "{D24ADBAA-6800-4742-94BE-A51731BB58D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Background", "Background", "{2DB6EE51-E38E-43A5-BD49-E5791AAB97CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +121,10 @@ Global
 		{66AB79B8-93D2-450D-AD22-8DC1020F203E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66AB79B8-93D2-450D-AD22-8DC1020F203E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66AB79B8-93D2-450D-AD22-8DC1020F203E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D24ADBAA-6800-4742-94BE-A51731BB58D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D24ADBAA-6800-4742-94BE-A51731BB58D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D24ADBAA-6800-4742-94BE-A51731BB58D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D24ADBAA-6800-4742-94BE-A51731BB58D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -144,6 +152,8 @@ Global
 		{9A229AB6-156C-4FB7-9DD7-68B2316E858F} = {CF37DE30-D9C7-4B8D-9423-39AFF10EA59C}
 		{F9FB29EA-F3A7-418B-81BD-05F911942B14} = {CF37DE30-D9C7-4B8D-9423-39AFF10EA59C}
 		{66AB79B8-93D2-450D-AD22-8DC1020F203E} = {CF37DE30-D9C7-4B8D-9423-39AFF10EA59C}
+		{D24ADBAA-6800-4742-94BE-A51731BB58D1} = {2DB6EE51-E38E-43A5-BD49-E5791AAB97CB}
+		{2DB6EE51-E38E-43A5-BD49-E5791AAB97CB} = {7012EF14-763A-4EDB-AA05-E7949C72C376}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2796BB28-6981-4249-977A-65631C13B469}

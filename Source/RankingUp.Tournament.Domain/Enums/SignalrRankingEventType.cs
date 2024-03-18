@@ -9,5 +9,6 @@
         RankingStarted = 5,
         RankingFinished = 6,
         GameUpdated = 7,
+        RankingTable = 8,
     }
 }

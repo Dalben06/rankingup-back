@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MySqlX.XDevAPI.Common;
+using RankingUp.Background.Service.Service;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
@@ -157,7 +158,7 @@ namespace RankingUp.Tournament.Application.Services
                         scope.Complete();
                     }
                     if (rank.IsStart)
-                        await _mediatorHandler.PublishDomainEvent(new RankingStartedEvent(rank.UUId, rank.CreatePersonId));
+                        QueueTaskEvent.Instance.AddTask(new RankingStartedEvent(rank.UUId, rank.CreatePersonId));
 
                     return new RequestResponse<RankingDetailViewModel>(_mapper.Map<RankingDetailViewModel>(await _tournamentsRepository.GetById(rank.Id)), noticable);
                 }
@@ -193,7 +194,7 @@ namespace RankingUp.Tournament.Application.Services
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new RankingStartedEvent(orig.UUId, UseId));
+                    QueueTaskEvent.Instance.AddTask(new RankingStartedEvent(orig.UUId, UseId));
                 }
             }
             catch (Exception ex)
@@ -220,7 +221,7 @@ namespace RankingUp.Tournament.Application.Services
                         await _tournamentsRepository.UpdateAsync(orig);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new RankingEndedEvent(orig.UUId, UseId));
+                    QueueTaskEvent.Instance.AddTask(new RankingEndedEvent(orig.UUId, UseId));
                 }
             }
             catch (Exception ex)

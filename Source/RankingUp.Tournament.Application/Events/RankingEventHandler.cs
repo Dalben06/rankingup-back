@@ -196,7 +196,19 @@ namespace RankingUp.Tournament.Application.Events
                     }
                     
                     if(tournament.AutoQueue && tournament.IsStart && !tournament.IsFinish && notification.NeedCreateMatch)
+                    {
+                        var newTableRanking = await _rankingGameService.GetRankingPlayers(notification.TournamentId);
+                        if (newTableRanking.Model.Any())
+                        {
+                            var signalrEventRankingPlayers = new RankingUpdateSignalr(
+                               notification.UUId,
+                               SignalrRankingEventType.RankingTable,
+                               newTableRanking.Model);
+                            await this._hubContext.Clients.Groups(notification.TournamentId.ToString().ToLower()).SendAsync("rankingUpdate", signalrEventRankingPlayers);
+                        }
+
                         await _rankingGameService.CreateGameUsingQueue(notification.TournamentId, notification.UserId);
+                    }
                 }
                 
 

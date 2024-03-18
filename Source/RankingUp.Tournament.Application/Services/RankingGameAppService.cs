@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using MediatR;
+using RankingUp.Background.Service.Interfaces;
+using RankingUp.Background.Service.Service;
 using RankingUp.Core.Communication.Mediator;
 using RankingUp.Core.Domain;
 using RankingUp.Tournament.Application.Interfaces;
@@ -115,7 +116,7 @@ namespace RankingUp.Tournament.Application.Services
                         game = await _tournamentGameRepository.InsertAsync(game);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new RankingGameCreatedEvent(game.UUId, game.Tournament.UUId, game.TeamOne.UUId, game.TeamTwo.UUId, game.CreatePersonId));
+                    QueueTaskEvent.Instance.AddTask(new RankingGameCreatedEvent(game.UUId, game.Tournament.UUId, game.TeamOne.UUId, game.TeamTwo.UUId, game.CreatePersonId));
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
                 }
             }
@@ -190,7 +191,7 @@ namespace RankingUp.Tournament.Application.Services
                         game = await _tournamentGameRepository.InsertAsync(game);
                         scope.Complete();
                     }
-                    await _mediatorHandler.PublishDomainEvent(new RankingGameCreatedEvent(game.UUId, game.Tournament.UUId, game.TeamOne.UUId, game.TeamTwo.UUId, game.CreatePersonId));
+                    QueueTaskEvent.Instance.AddTask(new RankingGameCreatedEvent(game.UUId, game.Tournament.UUId, game.TeamOne.UUId, game.TeamTwo.UUId, game.CreatePersonId));
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
                 }
             }
@@ -234,7 +235,7 @@ namespace RankingUp.Tournament.Application.Services
                         scope.Complete();
                     }
 
-                    await _mediatorHandler.PublishDomainEvent(new RankingGameUpdatedEvent(game.UUId, game.Tournament.UUId,
+                    QueueTaskEvent.Instance.AddTask(new RankingGameUpdatedEvent(game.UUId, game.Tournament.UUId,
                             game.IsFinished, game.TeamOne.UUId, game.TeamTwo.UUId, game.UpdatePersonId, !orig.IsFinished && game.IsFinished));
 
                     return new RequestResponse<RankingGameDetailViewModel>(_mapper.Map<RankingGameDetailViewModel>(await _tournamentGameRepository.GetById(game.Id)), noticable);
