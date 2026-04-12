@@ -14,6 +14,7 @@ using RankingUp.Tournament.Application.Interfaces;
 using RankingUp.Tournament.Application.Services;
 using RankingUp.Tournament.Data.Repositories;
 using RankingUp.Tournament.Domain.Repositories;
+using RankingUp.WebApp.API.Setup;
 using System.Reflection;
 
 namespace RankingUp.WebApp.API.Setup
@@ -37,7 +38,7 @@ namespace RankingUp.WebApp.API.Setup
 
         private static void RegisterConfig(this IServiceCollection services)
         {
-            services.AddDapperConfig();
+            services.RegisterDapperTypeHandlers();
             services.AddAutoMapperConfiguration();
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.FullName.ToLower().Contains("rankingup")).ToArray();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(assemblies));

@@ -29,10 +29,10 @@ namespace RankingUp.Tournament.Data.Repositories
              ON Players.Id = TournamentTeams.TeamId
 
              WHERE 1 = 1
-             AND TournamentTeams.IsDeleted = 0
-             AND Tournaments.IsDeleted = 0 
-             AND Players.IsDeleted = 0 
-             AND TournamentTeams.IsActive = 1
+             AND TournamentTeams.IsDeleted = FALSE
+             AND Tournaments.IsDeleted = FALSE 
+             AND Players.IsDeleted = FALSE 
+             AND TournamentTeams.IsActive = TRUE
              ";
         }
 

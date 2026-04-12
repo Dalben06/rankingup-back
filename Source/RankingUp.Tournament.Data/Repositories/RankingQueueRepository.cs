@@ -30,10 +30,10 @@ namespace RankingUp.Tournament.Data.Repositories
              ON Players.Id = TournamentTeams.TeamId
 
              WHERE 1 = 1
-             AND RankingQueues.IsDeleted = 0
-             AND Tournaments.IsDeleted = 0 
-             AND TournamentTeams.IsDeleted = 0 
-             AND Players.IsDeleted = 0 
+             AND RankingQueues.IsDeleted = FALSE
+             AND Tournaments.IsDeleted = FALSE 
+             AND TournamentTeams.IsDeleted = FALSE 
+             AND Players.IsDeleted = FALSE 
              AND Tournaments.FinishDate is null
              ";
         }
