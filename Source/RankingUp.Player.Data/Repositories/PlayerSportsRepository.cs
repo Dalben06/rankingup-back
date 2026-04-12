@@ -1,5 +1,4 @@
-﻿using MySqlX.XDevAPI.Common;
-using RankingUp.Core.Data;
+﻿using RankingUp.Core.Data;
 using RankingUp.Player.Domain.Entities;
 using RankingUp.Player.Domain.IRepositories;
 using RankingUp.Sport.Domain.Entities;

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MySqlX.XDevAPI.Common;
 using RankingUp.Background.Service.Service;
 using RankingUp.Club.Domain.IRepositories;
 using RankingUp.Core.Communication.Mediator;
