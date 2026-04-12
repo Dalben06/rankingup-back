@@ -19,8 +19,8 @@ namespace RankingUp.Club.Domain.Entities
         public string Country { get; private set; }
         public string PostalCode { get; private set; }
         public string Phone { get; private set; }
-        public TimeSpan BusinessHourStart { get; private set; }
-        public TimeSpan BusinessHourEnd { get; private set; }
+        public TimeOnly BusinessHourStart { get; private set; }
+        public TimeOnly BusinessHourEnd { get; private set; }
         public string FacebookUrl { get; private set; }
         public string InstagramUrl { get; private set; }
         public string TwitterUrl { get; private set; }
@@ -36,12 +36,10 @@ namespace RankingUp.Club.Domain.Entities
         }
         public Clubs(string name, string description, string address, string city, string state,
             string country, string phone, string postalCode,
-            string businessHourStart, string businessHourEnd, 
+            TimeOnly businessHourStart, TimeOnly businessHourEnd, 
             string facebookUrl, string instagramUrl, string twitterUrl, string imageUrl
             , bool isActive, string email, string addressNumber, string addressComplement, string addressDistrict, int UserId) : base(UserId)
         {
-            TimeSpan.TryParse(businessHourStart, out var startHour);
-            TimeSpan.TryParse(businessHourEnd, out var endHour);
 
             Name = name;
             Description = description;
@@ -51,8 +49,8 @@ namespace RankingUp.Club.Domain.Entities
             Country = country;
             Phone = phone.OnlyNumbers();
             PostalCode = postalCode;
-            BusinessHourStart = startHour;
-            BusinessHourEnd = endHour;
+            BusinessHourStart = businessHourStart;
+            BusinessHourEnd = businessHourEnd;
             FacebookUrl = facebookUrl;
             InstagramUrl = instagramUrl;
             TwitterUrl = twitterUrl;

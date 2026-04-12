@@ -24,13 +24,13 @@ namespace RankingUp.Club.Data.Repositories
 
              LEFT JOIN ClubSports 
              ON ClubSports.ClubId = Clubs.Id
-             AND ClubSports.IsDeleted = 0
+             AND ClubSports.IsDeleted = FALSE
 
              LEFT JOIN Sports
              ON Sports.Id = ClubSports.SportId
 
              WHERE 1 = 1
-             AND Clubs.IsDeleted = 0
+             AND Clubs.IsDeleted = FALSE
              ";          
         }
 
@@ -52,13 +52,13 @@ namespace RankingUp.Club.Data.Repositories
 
                  INNER JOIN ClubSports 
                  ON ClubSports.ClubId = Clubs.Id
-                 AND ClubSports.IsDeleted = 0
+                 AND ClubSports.IsDeleted = FALSE
 
                  INNER JOIN Sports
                  ON Sports.Id = ClubSports.SportId
 
                  WHERE 1 = 1
-                 AND Clubs.IsDeleted = 0
+                 AND Clubs.IsDeleted = FALSE
                  AND Sports.UUId = @SportId 
                  AND Clubs.Id = @ClubId
                 ";

@@ -36,9 +36,9 @@ namespace RankingUp.Club.Application.ViewModels
         [StringLength( 50, ErrorMessage = "O Telefone pode ter no máximo {1} caracteres")]
         public string Phone { get; set; }
         [Required(ErrorMessage = "O Horario de Inicio de Funcionamento é obrigatório")]
-        public string BusinessHourStart { get; set; }
+        public TimeOnly BusinessHourStart { get; set; }
         [Required(ErrorMessage = "O Horario de encerramento de Funcionamento é obrigatório")]
-        public string BusinessHourEnd { get; set; }
+        public TimeOnly BusinessHourEnd { get; set; }
         [StringLength( 100, ErrorMessage = "O Facebook pode ter no máximo {1} caracteres")]
         public string FacebookUrl { get; set; }
         [StringLength( 100, ErrorMessage = "O Instagram pode ter no máximo {1} caracteres")]

@@ -29,26 +29,26 @@ namespace RankingUp.Tournament.Data.Repositories
 
              INNER JOIN Tournaments 
              ON Tournaments.Id = TournamentGames.TournamentId
-             AND Tournaments.IsDeleted = 0
+             AND Tournaments.IsDeleted = FALSE
 
              INNER JOIN TournamentTeams as TeamOne
              ON TeamOne.Id = TournamentGames.TeamOneId
-             AND TeamOne.IsDeleted = 0
+             AND TeamOne.IsDeleted = FALSE
 
              INNER JOIN Players as PlayerOne
              ON PlayerOne.Id = TeamOne.TeamId
-             AND PlayerOne.IsDeleted = 0
+             AND PlayerOne.IsDeleted = FALSE
 
              INNER JOIN TournamentTeams as TeamTwo
              ON TeamTwo.Id = TournamentGames.TeamTwoId
-             AND TeamTwo.IsDeleted = 0
+             AND TeamTwo.IsDeleted = FALSE
 
              INNER JOIN Players as PlayerTwo
              ON PlayerTwo.Id = TeamTwo.TeamId
-             AND PlayerTwo.IsDeleted = 0
+             AND PlayerTwo.IsDeleted = FALSE
 
              WHERE 1 = 1
-             AND TournamentGames.IsDeleted = 0
+             AND TournamentGames.IsDeleted = FALSE
 
              ";
         }

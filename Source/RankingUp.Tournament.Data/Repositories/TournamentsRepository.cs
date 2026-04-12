@@ -26,7 +26,7 @@ namespace RankingUp.Tournament.Data.Repositories
              ON Clubs.Id = Tournaments.ClubId
 
              WHERE 1 = 1
-             AND Tournaments.IsDeleted = 0 
+             AND Tournaments.IsDeleted = FALSE 
 
 
              ";
@@ -53,7 +53,7 @@ namespace RankingUp.Tournament.Data.Repositories
              ON Clubs.Id = Tournaments.ClubId
 
              WHERE 1 = 1
-             AND Tournaments.IsDeleted = 0 
+             AND Tournaments.IsDeleted = FALSE 
 
              ";
         }

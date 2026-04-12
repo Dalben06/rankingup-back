@@ -26,21 +26,21 @@ namespace RankingUp.Player.Data.Repositories
 
              LEFT JOIN PlayerClubs
              ON Players.Id = PlayerClubs.PlayerId
-             AND PlayerClubs.IsDeleted = 0
+             AND PlayerClubs.IsDeleted = FALSE
 
              LEFT JOIN PlayerSports
              ON Players.Id = PlayerSports.PlayerId
-             AND PlayerSports.IsDeleted = 0
+             AND PlayerSports.IsDeleted = FALSE
 
              LEFT JOIN Sports
              ON Sports.Id = PlayerSports.SportId
 
              LEFT JOIN Clubs
              ON Clubs.Id = PlayerClubs.ClubId
-             AND Clubs.IsDeleted = 0
+             AND Clubs.IsDeleted = FALSE
 
              WHERE 1 = 1
-             AND Players.IsDeleted = 0 
+             AND Players.IsDeleted = FALSE 
              ";
         }
 

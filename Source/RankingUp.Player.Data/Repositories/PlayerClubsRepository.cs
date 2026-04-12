@@ -32,14 +32,14 @@ namespace RankingUp.Player.Data.Repositories
 
              INNER JOIN Players
              ON Players.Id = PlayerClubs.PlayerId
-             AND Players.IsDeleted = 0 
+             AND Players.IsDeleted = FALSE 
 
              INNER JOIN Clubs
              ON Clubs.Id = PlayerClubs.ClubId
-             AND Clubs.IsDeleted = 0
+             AND Clubs.IsDeleted = FALSE
 
              WHERE 1 = 1
-             AND PlayerClubs.IsDeleted = 0
+             AND PlayerClubs.IsDeleted = FALSE
 
             ";
         }

@@ -25,13 +25,13 @@ namespace RankingUp.Club.Data.Repositories
 
              JOIN Clubs 
              ON Clubs.Id = ClubSports.ClubId
-             AND Clubs.IsDeleted = 0
+             AND Clubs.IsDeleted = FALSE
 
              JOIN Sports 
              ON Sports.Id = ClubSports.SportId
             
              WHERE 1 = 1
-             AND ClubSports.IsDeleted = 0 
+             AND ClubSports.IsDeleted = FALSE 
             ";
         }
 

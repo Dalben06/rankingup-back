@@ -8,7 +8,7 @@ namespace RankingUp.Club.Application.ViewModels
         public string Name { get; set; }
         public string Description { get; set; }
         public string CompleteAddress { get; set; }
-        public string BusinessHourEnd { get; set; }
-        public string BusinessHourStart { get; set; }
+        public TimeOnly BusinessHourEnd { get; set; }
+        public TimeOnly BusinessHourStart { get; set; }
     }
 }
