@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 
 namespace RankingUp.WebApp.API.Setup
 {
@@ -29,18 +29,11 @@ namespace RankingUp.WebApp.API.Setup
                     Type = SecuritySchemeType.ApiKey
                 });
 
-                s.AddSecurityRequirement(new OpenApiSecurityRequirement
+                s.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
+                        new OpenApiSecuritySchemeReference("Bearer"),
+                        new List<string>()
                     }
                 });
 

@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
-using MySqlX.XDevAPI.Common;
 using RankingUp.Core.Domain;
 using RankingUp.Core.Extensions;
 using RankingUp.Core.Helpers;

@@ -13,7 +13,8 @@
 
     public enum DatabaseType
     {
-        MySql = 1, 
+        MySql = 1,
         SqlServer = 2,
+        PostgreSql = 3,
     }
 }

@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "C#: RankingUp.WebApp.API",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Source/RankingUp.WebApp.API/RankingUp.WebApp.API.csproj",
+            "launchConfigurationId": "TargetFramework=;RankingUp.WebApp.API"
+        }
+    ]
+}

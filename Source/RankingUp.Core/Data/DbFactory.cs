@@ -19,6 +19,7 @@ namespace RankingUp.Core.Data
             {
                 DatabaseType.SqlServer => new SqlServerStrategy().GetConnection(this._connectionString),
                 DatabaseType.MySql => new MySqlServerStrategy().GetConnection(this._connectionString),
+                DatabaseType.PostgreSql => new PostgreSqlStrategy().GetConnection(this._connectionString),
                 _ => null
             };
 
@@ -29,6 +30,7 @@ namespace RankingUp.Core.Data
             {
                 DatabaseType.SqlServer => new SqlServerStrategy().GetConnection(this._connectionString),
                 DatabaseType.MySql => new MySqlServerStrategy().GetConnection(this._connectionString),
+                DatabaseType.PostgreSql => new PostgreSqlStrategy().GetConnection(this._connectionString),
                 _ => null
             };
         }
