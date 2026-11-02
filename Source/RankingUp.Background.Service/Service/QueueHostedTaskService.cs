@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
 using RankingUp.Background.Service.Interfaces;
-using RankingUp.Core.Messages;
 using System.Diagnostics;
 
 namespace RankingUp.Background.Service.Service
@@ -8,12 +7,10 @@ namespace RankingUp.Background.Service.Service
     public sealed class QueueHostedTaskService : BackgroundService
     {
         private readonly IRunEventTaskService _runEventTaskService;
-        private Event _eventExecution = null;
         private const int MaxQueueMillisegundsSecundsToRead = 100; 
 
         public QueueHostedTaskService(IRunEventTaskService runEventTaskService)
         {
-            _eventExecution = null;
             _runEventTaskService = runEventTaskService;
         }
 
@@ -27,25 +24,25 @@ namespace RankingUp.Background.Service.Service
             Debug.WriteLine($"Start to read the queue to execute");
             while (!stoppingToken.IsCancellationRequested)
             {
+                if (!QueueTaskEvent.Instance.TryDequeue(out var eventExecution))
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(MaxQueueMillisegundsSecundsToRead), stoppingToken);
+                    continue;
+                }
+
                 try
                 {
-                    if(QueueTaskEvent.Instance.QueueTask.Any() && _eventExecution is null)
-                    {
-                        _eventExecution = QueueTaskEvent.Instance.QueueTask.First();
-                        await _runEventTaskService.RunAsync(_eventExecution);
-                        QueueTaskEvent.Instance.RemoveTask(_eventExecution);
-                        _eventExecution = null;
-                    }
-                    else
-                        await Task.Delay(TimeSpan.FromMilliseconds(MaxQueueMillisegundsSecundsToRead));
+                    await _runEventTaskService.RunAsync(eventExecution);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    // Prevent throwing if stoppingToken was signaled
+                    return;
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex, "Error occurred executing task work item.");
+                    QueueTaskEvent.Instance.AddTask(eventExecution);
+                    await Task.Delay(TimeSpan.FromMilliseconds(MaxQueueMillisegundsSecundsToRead), stoppingToken);
                 }
             }
         }

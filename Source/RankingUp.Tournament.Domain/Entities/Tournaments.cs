@@ -21,8 +21,8 @@ namespace RankingUp.Tournament.Domain.Entities
             , decimal longitude, bool autoQueue, bool hasNotificationToPlayer) : base(ownerId)
         {
 
-            TimeSpan.TryParse(eventHourStart, out var startHour);
-            TimeSpan.TryParse(eventHourEnd, out var endHour);
+            TimeOnly.TryParse(eventHourStart, out var startHour);
+            TimeOnly.TryParse(eventHourEnd, out var endHour);
 
             Name = name;
             Description = description;
@@ -36,7 +36,9 @@ namespace RankingUp.Tournament.Domain.Entities
             PostalCode = postalCode;
             Phone = phone;
             Email = email;
-            EventDate = eventDate;
+            EventDate = eventDate.Kind == DateTimeKind.Local
+                ? eventDate.ToUniversalTime()
+                : DateTime.SpecifyKind(eventDate, DateTimeKind.Utc);
             EventHourStart = startHour;
             EventHourEnd = endHour;
             IsActive = isActive;
@@ -66,8 +68,8 @@ namespace RankingUp.Tournament.Domain.Entities
         public string Phone { get; private set; }
         public string Email { get; private set; }
         public DateTime EventDate { get; private set; }
-        public TimeSpan EventHourStart { get; private set; }
-        public TimeSpan EventHourEnd { get; private set; }
+        public TimeOnly EventHourStart { get; private set; }
+        public TimeOnly EventHourEnd { get; private set; }
         public bool IsActive { get; private set; }
         public int ClubId { get; private set; }
         public bool IsRanking { get; private set; }
@@ -124,14 +126,14 @@ namespace RankingUp.Tournament.Domain.Entities
 
         public void StartEvent(int UserId)
         {
-            this.StartDate = DateTime.Now;
-            this.UpdateDate = DateTime.Now;
+            this.StartDate = DateTime.UtcNow;
+            this.UpdateDate = DateTime.UtcNow;
             this.UpdatePersonId = UserId;
         }
         public void FinishEvent(int UserId)
         {
-            this.FinishDate = DateTime.Now;
-            this.UpdateDate = DateTime.Now;
+            this.FinishDate = DateTime.UtcNow;
+            this.UpdateDate = DateTime.UtcNow;
             this.UpdatePersonId = UserId;
         }
 
@@ -154,7 +156,7 @@ namespace RankingUp.Tournament.Domain.Entities
 
         public override void Disable(long IdUsuario)
         {
-            DeleteDate = UpdateDate = DateTime.Now;
+            DeleteDate = UpdateDate = DateTime.UtcNow;
             DeletePersonId = UpdatePersonId = (int)IdUsuario;
             IsDeleted= true;
             IsActive = false;

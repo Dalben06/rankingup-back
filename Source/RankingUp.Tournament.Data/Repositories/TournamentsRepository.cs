@@ -33,19 +33,32 @@ namespace RankingUp.Tournament.Data.Repositories
         }
 
 
-        private string GetDefaultPaginationSql()
+        private static string GetDistanceSql()
         {
-            return @"
+            return @"(
+                3959 *
+                acos(
+                    least(1, greatest(-1,
+                        cos(radians(@Latitude)) *
+                        cos(radians(Tournaments.latitude)) *
+                        cos(radians(Tournaments.longitude) -
+                        radians(@Longitude)) +
+                        sin(radians(@Latitude)) *
+                        sin(radians(Tournaments.latitude))
+                    ))
+                )
+            )";
+        }
+
+        private string GetDefaultPaginationSql(TournamentFilter filter)
+        {
+            var distance = filter.Latitude.HasValue && filter.Longitude.HasValue
+                ? $"{GetDistanceSql()} AS distance"
+                : "NULL AS distance";
+
+            return @$"
              SELECT Tournaments.* 
-               ,(
-                   3959 *
-                   acos(cos(radians(37)) * 
-                   cos(radians(Tournaments.latitude)) * 
-                   cos(radians(Tournaments.longitude) - 
-                   radians(-122)) + 
-                   sin(radians(37)) * 
-                   sin(radians(Tournaments.latitude )))
-                ) AS distance,
+               ,{distance},
               Clubs.*
               FROM Tournaments
 
@@ -65,32 +78,71 @@ namespace RankingUp.Tournament.Data.Repositories
             if (isRanking.HasValue)
                 sql += " AND Tournaments.IsRanking = @isRanking";
 
-            return _baseRepository.GetAsync<Tournaments, Clubs>(GetDefaultSql(), SQLMap(), new { isRanking });
+            return _baseRepository.GetAsync<Tournaments, Clubs>(sql, SQLMap(), new { isRanking });
         }
         public Task<IEnumerable<Tournaments>> GetAllByClub(Guid id)
         {
-            var sql = GetDefaultSql() + " AND Clubs.Id = @id";
+            var sql = GetDefaultSql() + " AND Clubs.UUId = @id";
 
-            return _baseRepository.GetAsync<Tournaments, Clubs>(GetDefaultSql(), SQLMap(), new { id });
+            return _baseRepository.GetAsync<Tournaments, Clubs>(sql, SQLMap(), new { id });
+        }
+
+        private static DateTime? AsUtc(DateTime? value)
+        {
+            if (!value.HasValue)
+                return null;
+
+            return value.Value.Kind switch
+            {
+                DateTimeKind.Utc => value,
+                DateTimeKind.Local => value.Value.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)
+            };
         }
 
         public Task<Pagination<Tournaments>> GetTournamentsByFilter(TournamentFilter filter)
         {
-            var sql = GetDefaultPaginationSql();
+            filter.StartDate = AsUtc(filter.StartDate);
+            filter.EndDate = AsUtc(filter.EndDate);
+
+            var sql = GetDefaultPaginationSql(filter);
 
             sql += @$" AND Tournaments.IsRanking = @IsRanking";
 
             if(filter.OnlyFinished.HasValue)
-                sql += @$" AND Tournaments.FinishDate {(filter.OnlyFinished.Value ? " NOT ": "")} is null ";
+                sql += filter.OnlyFinished.Value
+                    ? " AND Tournaments.FinishDate IS NOT NULL "
+                    : " AND Tournaments.FinishDate IS NULL ";
 
             if (filter.StartDate.HasValue && filter.EndDate.HasValue)
-                sql += @$" AND Tournaments.EventHourStart BETWEEN @StartDate AND @EndDate ";
+                sql += @" AND Tournaments.EventDate BETWEEN @StartDate AND @EndDate ";
 
-            //if (filter.RadioDistance.HasValue)
-            //    sql += @" AND Tournaments.latitude = @latitude AND Tournaments.longitude = @latitude AND ";
+            if (filter.RadioDistance.HasValue && filter.Latitude.HasValue && filter.Longitude.HasValue)
+                sql += $" AND {GetDistanceSql()} <= @RadioDistance ";
 
-            if(!string.IsNullOrEmpty(filter.Order) && !string.IsNullOrEmpty(filter.OrderType))
-                sql += $"  ORDER BY tournaments.{filter.Order} {filter.OrderType} ";
+            var orderColumns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Id"] = "Tournaments.Id",
+                ["UUId"] = "Tournaments.UUId",
+                ["Name"] = "Tournaments.Name",
+                ["EventDate"] = "Tournaments.EventDate",
+                ["EventHourStart"] = "Tournaments.EventHourStart",
+                ["EventHourEnd"] = "Tournaments.EventHourEnd",
+                ["StartDate"] = "Tournaments.StartDate",
+                ["FinishDate"] = "Tournaments.FinishDate",
+                ["CreateDate"] = "Tournaments.CreateDate",
+                ["UpdateDate"] = "Tournaments.UpdateDate",
+                ["Distance"] = "distance"
+            };
+
+            var orderType = string.Equals(filter.OrderType, "ASC", StringComparison.OrdinalIgnoreCase)
+                ? "ASC"
+                : string.Equals(filter.OrderType, "DESC", StringComparison.OrdinalIgnoreCase) ? "DESC" : null;
+
+            if (orderType != null && filter.Order != null && orderColumns.TryGetValue(filter.Order, out var orderColumn))
+                sql += $" ORDER BY {orderColumn} {orderType} ";
+            else
+                sql += " ORDER BY Tournaments.Id DESC ";
 
             return _baseRepository.GetPagination<Tournaments,Clubs>(filter, sql,SQLMap(), param: filter);
         }

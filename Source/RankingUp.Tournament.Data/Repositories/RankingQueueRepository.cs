@@ -51,7 +51,7 @@ namespace RankingUp.Tournament.Data.Repositories
             var dic = new Dictionary<long, RankingQueue>();
             return (queue, Tour,team,  player) =>
             {
-                if (dic.TryGetValue(team.Id, out var existingqueue))
+                if (dic.TryGetValue(queue.Id, out var existingqueue))
                 {
                     queue = existingqueue;
                 }

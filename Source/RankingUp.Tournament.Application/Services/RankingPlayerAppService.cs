@@ -137,11 +137,19 @@ namespace RankingUp.Tournament.Application.Services
                 if (playerIsPlaying != null)
                     noticable.AddNotification("Não pode remover um jogador em uma partida em andamento!");
 
+                var playerInQueue = (await _rankingQueueRepository.GetByTournamentIdOrderByCreateDate(orig.Tournament.UUId))
+                    .FirstOrDefault(player => player.Team.UUId == orig.UUId);
+
                 orig.Disable(UseId);
                 if (noticable.Valid)
                 {
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
+                        if (playerInQueue != null)
+                        {
+                            playerInQueue.Disable(UseId);
+                            await _rankingQueueRepository.DeleteAsync(playerInQueue);
+                        }
                         await _tournamentTeamRepository.DeleteAsync(orig);
                         scope.Complete();
                     }

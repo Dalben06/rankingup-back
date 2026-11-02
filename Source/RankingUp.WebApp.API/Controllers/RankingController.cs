@@ -62,7 +62,7 @@ namespace RankingUp.WebApp.API.Controllers
         [HttpGet("GetPlayersOnQueue/{Id}")]
         public async Task<IActionResult> GetPlayersOnQueue(Guid Id)
         {
-            return HttpResponse(await this._rankingPlayerAppService.GetPlayers(Id));
+            return HttpResponse(await this._rankingPlayerAppService.GetPlayersOnQueue(Id));
         }
 
         [HttpGet("GetGamesGoing/{Id}")]

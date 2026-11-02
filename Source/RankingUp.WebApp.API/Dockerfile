@@ -1,22 +1,20 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY ["Source/RankingUp.WebApp.API/RankingUp.WebApp.API.csproj", "Source/RankingUp.WebApp.API/"]
-RUN dotnet restore "Source/RankingUp.WebApp.API/RankingUp.WebApp.API.csproj"
 COPY . .
-WORKDIR "/src/Source/RankingUp.WebApp.API"
-RUN dotnet build "RankingUp.WebApp.API.csproj" -c Release -o /app/build
+RUN dotnet restore "Source/RankingUp.WebApp.API/RankingUp.WebApp.API.csproj"
 
 FROM build AS publish
-RUN dotnet publish "RankingUp.WebApp.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Source/RankingUp.WebApp.API/RankingUp.WebApp.API.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "RankingUp.WebApp.API.dll"]

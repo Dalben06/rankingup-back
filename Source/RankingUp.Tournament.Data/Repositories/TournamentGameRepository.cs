@@ -24,7 +24,7 @@ namespace RankingUp.Tournament.Data.Repositories
         private string GetDefaultSql()
         {
             return @"
-             SELECT TournamentGames.*, TeamOne.*,PlayerOne.*,TeamTwo.*, PlayerTwo.*
+             SELECT TournamentGames.*, TeamOne.*,PlayerOne.*,TeamTwo.*, PlayerTwo.*, Tournaments.*
              FROM TournamentGames
 
              INNER JOIN Tournaments 
@@ -55,34 +55,34 @@ namespace RankingUp.Tournament.Data.Repositories
 
 
         public Task<IEnumerable<TournamentGame>> GetAllGamesByTournamentId(Guid Id)
-            => _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players>(GetDefaultSql() + " AND Tournaments.UUId = @Id ORDER BY TournamentGames.Id DESC", SQLMap(), new { Id });
+            => _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players, Tournaments>(GetDefaultSql() + " AND Tournaments.UUId = @Id ORDER BY TournamentGames.Id DESC", SQLMap(), new { Id });
 
         public async Task<TournamentGame?> GetGameNotFinishByTeamAndTournamentId(Guid tour, Guid teamId)
         {
-            var SQL = GetDefaultSql() + @"  AND TournamentGames.IsFinished = 0 AND Tournaments.UUId = @tour
+            var SQL = GetDefaultSql() + @"  AND TournamentGames.IsFinished = FALSE AND Tournaments.UUId = @tour
             AND ( TeamTwo.UUId = @teamId OR TeamOne.UUId = @teamId )
             ";
 
-           return ( await _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players>(SQL, SQLMap(), new { tour, teamId }))?.FirstOrDefault();
+           return ( await _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players, Tournaments>(SQL, SQLMap(), new { tour, teamId }))?.FirstOrDefault();
         }
 
         public Task<IEnumerable<TournamentGame>> GetGameNotFinishTournamentId(Guid tour)
         {
-            var SQL = GetDefaultSql() + @"  AND TournamentGames.IsFinished = 0 AND Tournaments.UUId = @tour ";
+            var SQL = GetDefaultSql() + @"  AND TournamentGames.IsFinished = FALSE AND Tournaments.UUId = @tour ";
 
-            return _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players>(SQL, SQLMap(), new { tour });
+            return _baseRepository.GetAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players, Tournaments>(SQL, SQLMap(), new { tour });
         }
 
-        public Task<TournamentGame> GetById(Guid Id) => _baseRepository.GetByIdAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players>(GetDefaultSql(), Id, SQLMap());
-        public Task<TournamentGame> GetById(int Id) => _baseRepository.GetByIdAsync<TournamentGame, TournamentTeam,Players, TournamentTeam, Players>(GetDefaultSql(), Id, SQLMap());
+        public Task<TournamentGame> GetById(Guid Id) => _baseRepository.GetByIdAsync<TournamentGame, TournamentTeam, Players, TournamentTeam, Players, Tournaments>(GetDefaultSql(), Id, SQLMap());
+        public Task<TournamentGame> GetById(int Id) => _baseRepository.GetByIdAsync<TournamentGame, TournamentTeam,Players, TournamentTeam, Players, Tournaments>(GetDefaultSql(), Id, SQLMap());
         public Task<TournamentGame> InsertAsync(TournamentGame entity) => _baseRepository.InsertAsync<TournamentGame>(entity);
         public Task<bool> UpdateAsync(TournamentGame entity) => _baseRepository.UpdateAsync<TournamentGame>(entity);
         public Task<bool> DeleteAsync(TournamentGame entity) => _baseRepository.DeleteAsync<TournamentGame>(entity);
 
-        private Func<TournamentGame, TournamentTeam, Players, TournamentTeam, Players, TournamentGame> SQLMap()
+        private Func<TournamentGame, TournamentTeam, Players, TournamentTeam, Players, Tournaments, TournamentGame> SQLMap()
         {
             var dic = new Dictionary<long, TournamentGame>();
-            return (game, teamOne, playerOne, teamTwo, playerTwo) =>
+            return (game, teamOne, playerOne, teamTwo, playerTwo, tournament) =>
             {
                 if (dic.TryGetValue(game.Id, out var existingGame))
                 {
@@ -94,6 +94,7 @@ namespace RankingUp.Tournament.Data.Repositories
                     teamTwo.SetTeam(playerTwo);
                     game.SetTeamOne(teamOne);
                     game.SetTeamTwo(teamTwo);
+                    game.SetTournament(tournament);
                     dic.Add(game.Id, game);
                 }
 

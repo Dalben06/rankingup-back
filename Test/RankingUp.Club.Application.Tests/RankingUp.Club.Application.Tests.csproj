@@ -15,4 +15,8 @@
     <PackageReference Include="coverlet.collector" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\RankingUp.Club.Application\RankingUp.Club.Application.csproj" />
+  </ItemGroup>
+
 </Project>

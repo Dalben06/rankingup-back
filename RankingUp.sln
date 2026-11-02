@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sport", "Sport", "{8BC61F89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B162BE72-4C4C-48B5-8AF1-013F7A36F828}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Club.Application.ViewModel.Tests", "Test\RankingUp.Club.Application.ViewModel.Tests\RankingUp.Club.Application.ViewModel.Tests.csproj", "{D66C3486-F898-4118-8034-E81E4C92261C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Club.Application.Tests", "Test\RankingUp.Club.Application.Tests\RankingUp.Club.Application.Tests.csproj", "{D66C3486-F898-4118-8034-E81E4C92261C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankingUp.Sport.Domain", "Source\RankingUp.Sport.Domain\RankingUp.Sport.Domain.csproj", "{1C843C5F-9122-4C6C-AF0A-49B5BCE0FFBA}"
 EndProject

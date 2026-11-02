@@ -8,20 +8,9 @@
         public int ItensPerPage { get; set; }
         public int TotalPages
         {
-            get
-            {
-                if (this.TotalItens > 0 && this.ItensPerPage > 0)
-                {
-                    if (this.TotalItens == this.ItensPerPage)
-                        return 1;
-                    else
-                        return (this.TotalItens / this.ItensPerPage) + 1;
-                }
-
-                else
-                    return 1;
-
-            }
+            get => this.TotalItens > 0 && this.ItensPerPage > 0
+                ? (int)Math.Ceiling((double)this.TotalItens / this.ItensPerPage)
+                : 0;
         }
 
         public PaginationViewModel()
