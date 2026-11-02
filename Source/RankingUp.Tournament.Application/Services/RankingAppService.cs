@@ -21,6 +21,7 @@ namespace RankingUp.Tournament.Application.Services
         private readonly ITournamentsRepository _tournamentsRepository;
         private readonly ITournamentGameRepository _tournamentGameRepository;
         private readonly ITournamentTeamRepository _tournamentTeamRepository;
+        private readonly IRankingQueueRepository _rankingQueueRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IMapper _mapper;
         private readonly IMediatorHandler _mediatorHandler;
@@ -28,6 +29,7 @@ namespace RankingUp.Tournament.Application.Services
         public RankingAppService(ITournamentsRepository tournamentsRepository,
             ITournamentGameRepository tournamentGameRepository,
             ITournamentTeamRepository tournamentTeamRepository,
+            IRankingQueueRepository rankingQueueRepository,
             IClubRepository clubRepository,
             IMapper mapper,
             IMediatorHandler mediatorHandler)
@@ -35,6 +37,7 @@ namespace RankingUp.Tournament.Application.Services
             _tournamentsRepository = tournamentsRepository;
             _tournamentGameRepository = tournamentGameRepository;
             _tournamentTeamRepository = tournamentTeamRepository;
+            _rankingQueueRepository = rankingQueueRepository;
             _clubRepository = clubRepository;
             _mapper = mapper;
             _mediatorHandler = mediatorHandler;
@@ -212,12 +215,18 @@ namespace RankingUp.Tournament.Application.Services
                 if (orig is null)
                     throw new Exception("Ranking não encontrado!");
 
+                var playersInQueue = (await _rankingQueueRepository.GetByTournamentIdOrderByCreateDate(Id)).ToList();
                 orig.FinishEvent(UseId);
                 if (noticable.Valid)
                 {
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentsRepository.UpdateAsync(orig);
+                        foreach (var playerQueue in playersInQueue)
+                        {
+                            playerQueue.Disable(UseId);
+                            await _rankingQueueRepository.DeleteAsync(playerQueue);
+                        }
                         scope.Complete();
                     }
                     QueueTaskEvent.Instance.AddTask(new RankingEndedEvent(orig.UUId, UseId));
@@ -235,12 +244,12 @@ namespace RankingUp.Tournament.Application.Services
             var noticable = new Notifiable();
             try
             {
-                var rank = _mapper.Map<Tournaments>(model);
-                var orig = await _tournamentsRepository.GetById(rank.UUId);
+                var orig = await _tournamentsRepository.GetById(model.UUId);
 
                 if (orig is null)
-                    noticable.AddNotification("Jogador não encontrado!");
+                    throw new Exception("Ranking não encontrado!");
 
+                var rank = _mapper.Map(model, orig);
                 rank.SetClub(await _clubRepository.GetById(model.ClubUUId));
                 if (model.SameInformationClub)
                     rank.SetClubInfoInRank();
@@ -249,7 +258,6 @@ namespace RankingUp.Tournament.Application.Services
                 noticable.AddNotifications(rank.Notifications);
                 if (noticable.Valid)
                 {
-                    rank.Id = orig.Id;
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _tournamentsRepository.UpdateAsync(rank);

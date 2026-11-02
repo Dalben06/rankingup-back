@@ -36,7 +36,7 @@ namespace RankingUp.Club.Data.Repositories
 
         public Task<Clubs> GetById(Guid Id) => this._baseRepository.GetByIdAsync<Clubs,Sports>(GetDefaultSql(),Id,SQLMap());
         public Task<Clubs> GetById(int Id) => this._baseRepository.GetByIdAsync<Clubs, Sports>(GetDefaultSql(), Id, SQLMap());
-        public Task<IEnumerable<Clubs>> GetClubs(Guid[] Id) => this._baseRepository.GetAsync<Clubs, Sports>(GetDefaultSql() + " AND Clubs.Id in @Id", SQLMap(), new {Id});
+        public Task<IEnumerable<Clubs>> GetClubs(Guid[] Id) => this._baseRepository.GetAsync<Clubs, Sports>(GetDefaultSql() + " AND Clubs.UUId = ANY(@Id)", SQLMap(), new {Id});
         public Task<IEnumerable<Clubs>> GetAll() => this._baseRepository.GetAsync<Clubs, Sports>(GetDefaultSql(), SQLMap());
         public Task<Clubs> InsertAsync(Clubs club) => this._baseRepository.InsertAsync<Clubs>(club);
         public Task<bool> UpdateAsync(Clubs entity) => this._baseRepository.UpdateAsync<Clubs>(entity);
@@ -60,7 +60,7 @@ namespace RankingUp.Club.Data.Repositories
                  WHERE 1 = 1
                  AND Clubs.IsDeleted = FALSE
                  AND Sports.UUId = @SportId 
-                 AND Clubs.Id = @ClubId
+                  AND Clubs.UUId = @ClubId
                 ";
             return _baseRepository.GetAsync<Clubs, Sports>(SQL, SQLMap(), new { ClubId, SportId });
         } 
@@ -78,7 +78,8 @@ namespace RankingUp.Club.Data.Repositories
                 if (Club.Sports == null)
                     Club.Sports = new List<Sports>();   
 
-                Club.Sports.Add(Sport);
+                if (Sport != null && !Club.Sports.Any(x => x.Id == Sport.Id))
+                    Club.Sports.Add(Sport);
                 return Club;
             };
 

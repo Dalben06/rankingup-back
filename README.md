@@ -16,8 +16,8 @@ REST API and SignalR hub for the RankingUp sports ranking platform.
 | ORM | Dapper + Dapper.Contrib (raw SQL) |
 | Mapping | AutoMapper 12 (MIT) |
 | Messaging | MediatR 12 (MIT) |
-| Database (active) | MySQL via MySqlConnector 2.5.0 (MIT) |
-| Database (prepared) | PostgreSQL via Npgsql 10 (future migration) |
+| Database (local default) | PostgreSQL 17 via Npgsql 10 |
+| Database (supported) | MySQL via MySqlConnector 2.5.0, SQL Server via Microsoft.Data.SqlClient |
 | API Docs | Swashbuckle / Swagger UI (`/swagger`) |
 | Containerisation | Docker (multi-stage, built from repo root) |
 
@@ -51,7 +51,8 @@ Source/
 └── RankingUp.Tournament.Data
 
 Test/
-└── RankingUp.Club.Application.ViewModel.Tests
+└── RankingUp.Club.Application.Tests
+    └── ViewModels
 ```
 
 The data layer uses a **Strategy + Factory pattern** (`DbFactory` → `IDbStrategy`) to select the
@@ -64,26 +65,65 @@ Soft-delete is implemented via an `IsDeleted` flag — `DeleteAsync<T>` intentio
 
 ## Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- A running MySQL instance (or SQL Server — see configuration below)
-- (Optional) Docker
+- [Docker](https://docs.docker.com/get-docker/) with Compose (recommended path)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) for local builds and tests
 
 ---
 
 ## Running Locally
 
-### 1. Configure secrets
+### 1. Start the Docker stack (recommended)
 
-The connection string is **not** committed. Set it via [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets):
+The repository ships a PostgreSQL 17 + API Compose stack. It creates the schema, loads
+reference/demo data on first start, and exposes the API on port `8080`.
+
+```bash
+cp .env.example .env
+docker compose up --build --detach --wait
+```
+
+Verify it is ready:
+
+```bash
+curl http://localhost:8080/health/ready
+```
+
+Endpoints:
+
+- API: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger`
+- Health: `http://localhost:8080/health/live` and `http://localhost:8080/health/ready`
+- SignalR Hub: `http://localhost:8080/api/rankinghub`
+- PostgreSQL: `localhost:5432` (credentials from `.env`)
+
+Demo data includes two sports, one club, and two players. Run the end-to-end smoke check:
+
+```bash
+./Scripts/smoke_local.sh
+```
+
+Reset the database and reseed from scratch (destroys local data):
+
+```bash
+docker compose down --volumes
+docker compose up --build --detach --wait
+```
+
+The `docker compose` commands must run from the **repository root**; the API image is built with
+the repo root as its Docker context.
+
+### 2. Run against a database outside Docker
+
+Set the connection string via [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets)
+(never commit it):
 
 ```bash
 cd Source/RankingUp.WebApp.API
-dotnet user-secrets set "DatabaseContext:ConnectionString" "Server=localhost;Database=rankingup;User=root;Password=your_password;"
+dotnet user-secrets set "DatabaseContext:ConnectionString" "Host=localhost;Port=5432;Database=rankingup;Username=rankingup;Password=your_password"
 ```
 
-`DatabaseContext:DatabaseType` defaults to `1` (MySQL). Change to `2` for SQL Server.
-
-### 2. Restore and run
+`DatabaseContext:DatabaseType` values are `1` MySQL, `2` SQL Server, and `3` PostgreSQL. Local
+development defaults to `3`; the schema and seed scripts are PostgreSQL-specific.
 
 ```bash
 dotnet restore
@@ -99,24 +139,16 @@ The API will be available at:
 
 CORS is configured to allow `http://localhost:5173` (Vite frontend dev server).
 
-### 3. Run with Docker
-
-The Dockerfile must be built from the **repository root** (not from inside the API folder):
-
-```bash
-docker build -f Source/RankingUp.WebApp.API/Dockerfile -t rankingup-back .
-docker run -p 8080:80 \
-  -e DatabaseContext__ConnectionString="Server=host.docker.internal;..." \
-  rankingup-back
-```
-
 ---
 
 ## Running Tests
 
 ```bash
-dotnet test
+dotnet test Test/RankingUp.Club.Application.Tests/RankingUp.Club.Application.Tests.csproj
 ```
+
+The test project covers the Club application ViewModel validation rules. There is no configured
+lint, formatter, or codegen step; `dotnet build` is the type-check.
 
 ---
 
@@ -131,19 +163,21 @@ All runtime dependencies are open-source with permissive licenses.
 | MediatR | 12.0.1 | Apache-2.0 | Pinned to 12.x — 13+ requires commercial license |
 | Dapper.Contrib | 2.0.78 | Apache-2.0 | |
 | MySqlConnector | 2.5.0 | MIT | Replaces GPL-2.0 `MySql.Data` |
-| Npgsql | 10.0.2 | PostgreSQL License | Future PostgreSQL migration (inactive) |
+| Npgsql | 10.0.2 | PostgreSQL License | Local/default provider |
 | Microsoft.Data.SqlClient | 7.0.0 | MIT | Replaces deprecated/vulnerable `System.Data.SqlClient` |
 | Swashbuckle.AspNetCore | 10.1.7 | MIT | |
 | Microsoft.Extensions.Hosting.Abstractions | 10.0.0 | MIT | |
 
 ---
 
-## Future: PostgreSQL Migration
+## Database Providers
 
-The codebase is prepared for a future migration to PostgreSQL:
+`DbFactory` selects the driver from `DatabaseContext.DatabaseType`:
 
-- `Npgsql` is already a dependency of `RankingUp.Core`
-- `PostgreSqlStrategy` implements `IDbStrategy` and is registered in `DbFactory`
-- `DatabaseType.PostgreSql = 3` exists in the `Settings` enum
-- To activate: set `"DatabaseContext:DatabaseType": 3` and update the connection string
-- When migrating, remove `MySqlGuidTypeConfig` (PostgreSQL has native UUID support and does not need the Dapper `Guid` type handler)
+- `1` — MySQL
+- `2` — SQL Server
+- `3` — PostgreSQL (local default)
+
+`Scripts/recreate_database.sql` and `Scripts/seed_local_database.sql` are PostgreSQL-specific.
+PostgreSQL uses native UUIDs and `TIMESTAMPTZ`, so the Dapper `Guid` handler used for MySQL must
+stay out of the PostgreSQL path.

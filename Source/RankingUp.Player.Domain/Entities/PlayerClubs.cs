@@ -44,7 +44,7 @@ namespace RankingUp.Player.Domain.Entities
 
         public override void Disable(long IdUsuario)
         {
-            DeleteDate = UpdateDate = DateTime.Now;
+            DeleteDate = UpdateDate = DateTime.UtcNow;
             DeletePersonId = UpdatePersonId = (int)IdUsuario;
             IsDeleted = true;
             IsActive = false;

@@ -165,12 +165,13 @@ namespace RankingUp.Player.Application.Services
 
                 if (noticable.Valid)
                 {
+                    PlayerSports result;
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled    ))
                     {
-                        var result = await _playerSportsRepository.InsertAsync(new PlayerSports(true, model.UserId, sport, player));
-                        viewModel = _mapper.Map<PlayerSportViewModel>(await _playerSportsRepository.GetById(result.UUId));
+                        result = await _playerSportsRepository.InsertAsync(new PlayerSports(true, model.UserId, sport, player));
                         scope.Complete();
                     }
+                    viewModel = _mapper.Map<PlayerSportViewModel>(await _playerSportsRepository.GetById(result.UUId));
                 }
             }
             catch (Exception ex)
@@ -225,12 +226,13 @@ namespace RankingUp.Player.Application.Services
 
                 if (noticable.Valid)
                 {
+                    PlayerClubs result;
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        var result = await _playerClubsRepository.InsertAsync(new PlayerClubs(true, model.UserId, club, player));
-                        viewModel = _mapper.Map<PlayerClubViewModel>(await _playerClubsRepository.GetById(result.UUId));
+                        result = await _playerClubsRepository.InsertAsync(new PlayerClubs(true, model.UserId, club, player));
                         scope.Complete();
                     }
+                    viewModel = _mapper.Map<PlayerClubViewModel>(await _playerClubsRepository.GetById(result.UUId));
                 }
             }
             catch (Exception ex)

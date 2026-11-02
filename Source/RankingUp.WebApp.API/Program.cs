@@ -1,14 +1,17 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using RankingUp.WebApp.API.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+if (string.IsNullOrWhiteSpace(builder.Configuration["DatabaseContext:ConnectionString"]))
+    throw new InvalidOperationException("DatabaseContext:ConnectionString must be configured.");
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
 builder.Services.RegisterServices(builder.Configuration);
 builder.Services.RegisterBackgroundServices();
 builder.Services.AddCors(policyBuilder =>
@@ -22,14 +25,19 @@ builder.Services.AddCors(policyBuilder =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseCors();
 
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHubs();
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false
+});
+app.MapHealthChecks("/health/ready");
 app.Run();

@@ -152,7 +152,7 @@ namespace RankingUp.Tournament.Domain.Entities
         public override void Disable(long IdUsuario)
         {
             IsDeleted = true;
-            DeleteDate = UpdateDate = DateTime.Now;
+            DeleteDate = UpdateDate = DateTime.UtcNow;
             DeletePersonId = UpdatePersonId = (int)IdUsuario;
         }
 

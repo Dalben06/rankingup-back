@@ -48,11 +48,11 @@ namespace RankingUp.Tournament.Application.Events
         {
             try
             {
-                var team = await _tournamentTeamRepository.GetById(notification.UUId);
                 var tournament = await _tournamentsRepository.GetById(notification.TournamentUUId);
 
                 if (notification.Action == PlayerRankingActionEnum.Added)
                 {
+                    var team = await _tournamentTeamRepository.GetById(notification.UUId);
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         await _rankingQueueRepository.InsertAsync(new RankingQueue(tournament, team, notification.UserId));
@@ -62,14 +62,14 @@ namespace RankingUp.Tournament.Application.Events
                 else
                 {
                     var playerInQueue = (await _rankingQueueRepository.GetByTournamentIdOrderByCreateDate(notification.TournamentUUId))
-                        ?.FirstOrDefault(x => x.Team.UUId == notification.TournamentUUId);
+                        ?.FirstOrDefault(x => x.Team.UUId == notification.UUId);
 
                     if (playerInQueue != null)
                     {
                         using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                         {
                             playerInQueue.Disable(notification.UserId);
-                            await _rankingQueueRepository.DeleteAsync(new RankingQueue(tournament, team, notification.UserId));
+                            await _rankingQueueRepository.DeleteAsync(playerInQueue);
                             scope.Complete();
                         }
                     }
@@ -135,17 +135,6 @@ namespace RankingUp.Tournament.Application.Events
                 await this._hubContext.Clients.Groups(notification.UUId.ToString().ToLower()).SendAsync("rankingUpdate", signalrEvent);
                 
 
-                var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(notification.UUId);
-                using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
-                {
-                    foreach (var playerQueue in playersInQueue)
-                    {
-                        playerQueue.Disable(notification.UserId);
-                        await _rankingQueueRepository.DeleteAsync(playerQueue);
-                    }
-                    scope.Complete();
-                }
-
             }
             catch (Exception)
             {
@@ -185,7 +174,7 @@ namespace RankingUp.Tournament.Application.Events
 
                 await this._hubContext.Clients.Groups(notification.TournamentId.ToString().ToLower()).SendAsync("rankingUpdate", signalrEvent);
 
-                if (notification.IsFinished && notification.NeedCreateMatch)
+                if (notification.IsFinished && notification.NeedCreateMatch && tournament.IsStart && !tournament.IsFinish)
                 {
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
@@ -194,7 +183,7 @@ namespace RankingUp.Tournament.Application.Events
                         scope.Complete();
                     }
                     
-                    if(tournament.AutoQueue && tournament.IsStart && !tournament.IsFinish && notification.NeedCreateMatch)
+                    if(tournament.AutoQueue)
                     {
                         var newTableRanking = await _rankingGameService.GetRankingPlayers(notification.TournamentId);
                         if (newTableRanking.Model.Any())

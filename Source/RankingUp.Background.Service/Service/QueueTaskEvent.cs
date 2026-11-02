@@ -4,37 +4,53 @@ namespace RankingUp.Background.Service.Service
 {
     public class QueueTaskEvent
     {
-        private static QueueTaskEvent instance = null;
+        private static readonly Lazy<QueueTaskEvent> instance = new(() => new QueueTaskEvent());
+        private readonly object _queueLock = new();
 
         private QueueTaskEvent()
         {
             _queueTask = new List<Event> { };
         }
 
-        public static QueueTaskEvent Instance
+        public static QueueTaskEvent Instance => instance.Value;
+
+        public IReadOnlyList<Event> QueueTask
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new QueueTaskEvent();
-                }
-                return instance;
+                lock (_queueLock)
+                    return _queueTask.ToArray();
             }
         }
-
-        public IReadOnlyList<Event> QueueTask { get => _queueTask; }
 
         private readonly List<Event> _queueTask; 
 
         public void AddTask(Event task)
         {
-            _queueTask.Add(task);
+            lock (_queueLock)
+                _queueTask.Add(task);
         }
 
         public void RemoveTask(Event task) 
         {
-            _queueTask.Remove(task);
+            lock (_queueLock)
+                _queueTask.Remove(task);
+        }
+
+        public bool TryDequeue(out Event task)
+        {
+            lock (_queueLock)
+            {
+                if (_queueTask.Count == 0)
+                {
+                    task = null;
+                    return false;
+                }
+
+                task = _queueTask[0];
+                _queueTask.RemoveAt(0);
+                return true;
+            }
         }
 
 

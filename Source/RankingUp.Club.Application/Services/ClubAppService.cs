@@ -205,12 +205,13 @@ namespace RankingUp.Club.Application.Services
 
                 if (noticable.Valid)
                 {
+                    ClubSport result;
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        var result = await _clubSportRepository.InsertAsync(new ClubSport(club.Id, sport.Id, clubDetailViewModel.UserId));
-                        viewModel = _mapper.Map<ClubSportViewModel>(await _clubSportRepository.GetById(result.UUId));
+                        result = await _clubSportRepository.InsertAsync(new ClubSport(club.Id, sport.Id, clubDetailViewModel.UserId));
                         scope.Complete();
                     }
+                    viewModel = _mapper.Map<ClubSportViewModel>(await _clubSportRepository.GetById(result.UUId));
                 }
             }
             catch (Exception ex)

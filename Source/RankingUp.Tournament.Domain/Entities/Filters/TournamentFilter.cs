@@ -6,6 +6,8 @@ namespace RankingUp.Tournament.Domain.Entities.Filters
     {
         public bool IsRanking { get; set; }
         public decimal? RadioDistance { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
         public bool? OnlyFinished { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

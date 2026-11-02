@@ -84,16 +84,20 @@ namespace RankingUp.Tournament.Application.Services
             var noticable = new Notifiable();
             try
             {
-                var teamOne = _tournamentTeamRepository.GetById(model.TeamOneUUId);
-                var teamTwo = _tournamentTeamRepository.GetById(model.TeamTwoUUId);
-                var ranking = _tournamentsRepository.GetById(model.TournamentUUId);
+                var teamOneTask = _tournamentTeamRepository.GetById(model.TeamOneUUId);
+                var teamTwoTask = _tournamentTeamRepository.GetById(model.TeamTwoUUId);
+                var rankingTask = _tournamentsRepository.GetById(model.TournamentUUId);
 
-                await Task.WhenAll(teamOne, teamTwo, ranking);
+                await Task.WhenAll(teamOneTask, teamTwoTask, rankingTask);
+
+                var teamOne = await teamOneTask;
+                var teamTwo = await teamTwoTask;
+                var ranking = await rankingTask;
 
                 var game = new TournamentGame(
-                    await teamOne,
-                    await teamTwo,
-                    await ranking, model.UserId);
+                    teamOne,
+                    teamTwo,
+                    ranking, model.UserId);
 
                 game.Validate();
 
@@ -102,17 +106,33 @@ namespace RankingUp.Tournament.Application.Services
                 if (game.Tournament?.IsFinish ?? false)
                     noticable.AddNotification("O Ranking já foi finalizado");
 
+                if (teamOne != null && teamTwo != null && teamOne.Id == teamTwo.Id)
+                    noticable.AddNotification("Os times da partida devem ser diferentes");
+
+                if (ranking != null && (teamOne?.TournamentId != ranking.Id || teamTwo?.TournamentId != ranking.Id))
+                    noticable.AddNotification("Os times devem pertencer ao Ranking informado");
+
                 if (game.Tournament != null)
                 {
-                    var gamePlaying = await _tournamentGameRepository.GetAllGamesByTournamentId(game.Tournament.UUId);
+                    var gamePlaying = await _tournamentGameRepository.GetGameNotFinishTournamentId(game.Tournament.UUId);
                     if (gamePlaying != null && gamePlaying.Count() >= game.Tournament.MatchSameTime)
                         noticable.AddNotification("O numero maximo de jogos ao mesmo tempo foi atingido");
                 }
 
                 if (noticable.Valid)
                 {
+                    var playersInQueue = await _rankingQueueRepository.GetByTournamentIdOrderByCreateDate(model.TournamentUUId);
+                    var playersToDeleteInQueue = playersInQueue
+                        .Where(player => player.TeamId == teamOne.Id || player.TeamId == teamTwo.Id)
+                        .ToList();
+
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
+                        foreach (var playerQueue in playersToDeleteInQueue)
+                        {
+                            playerQueue.Disable(model.UserId);
+                            await _rankingQueueRepository.DeleteAsync(playerQueue);
+                        }
                         game = await _tournamentGameRepository.InsertAsync(game);
                         scope.Complete();
                     }
@@ -132,26 +152,29 @@ namespace RankingUp.Tournament.Application.Services
             var noticable = new Notifiable();
             try
             {
-                var playersInQueue = await this._rankingQueueRepository.GetByTournamentIdOrderByCreateDate(TournamentId);
-                if (!playersInQueue.Any() || playersInQueue.Count() <= 1)
+                var playersInQueueTask = _rankingQueueRepository.GetByTournamentIdOrderByCreateDate(TournamentId);
+                var gamesTask = _tournamentGameRepository.GetAllGamesByTournamentId(TournamentId);
+                var gamesPlayingTask = _tournamentGameRepository.GetGameNotFinishTournamentId(TournamentId);
+                var rankingTask = _tournamentsRepository.GetById(TournamentId);
+
+                await Task.WhenAll(playersInQueueTask, gamesTask, gamesPlayingTask, rankingTask);
+
+                var playersInQueue = (await playersInQueueTask).ToList();
+                if (playersInQueue.Count <= 1)
                     throw new Exception("Não há jogadores suficientes na Fila");
 
-                var games = await this._tournamentGameRepository.GetAllGamesByTournamentId(TournamentId);
+                var games = await gamesTask;
+                var gamesPlaying = await gamesPlayingTask;
+                var ranking = await rankingTask;
                 var team1 = playersInQueue.First().Team;
 
                 TournamentTeam team2 = null;
                 int gamesPlayedWithTeam1 = int.MaxValue;
                 foreach (var rankingQueue in playersInQueue.Where(x => x.TeamId != team1.Id))
                 {
-                    var gamesPlayeds = games.Where(x => x.TeamOneId == rankingQueue.TeamId || x.TeamTwoId == rankingQueue.TeamId);
-                    if (!gamesPlayeds.Any())
-                    {
-                        gamesPlayedWithTeam1 = 0;
-                        team2 = rankingQueue.Team;
-                        break;
-                    }
-                    var gamesWithTeam1 = games.Where(x => x.TeamOneId == rankingQueue.TeamId || x.TeamTwoId == team1.Id).Count();
-                    gamesWithTeam1 += games.Where(x => x.TeamTwoId == rankingQueue.TeamId || x.TeamOneId == team1.Id).Count();
+                    var gamesWithTeam1 = games.Count(x =>
+                        (x.TeamOneId == team1.Id && x.TeamTwoId == rankingQueue.TeamId) ||
+                        (x.TeamTwoId == team1.Id && x.TeamOneId == rankingQueue.TeamId));
 
                     if (gamesWithTeam1 < gamesPlayedWithTeam1)
                     {
@@ -163,7 +186,7 @@ namespace RankingUp.Tournament.Application.Services
                 var game = new TournamentGame(
                     team1,
                     team2,
-                    (await _tournamentsRepository.GetById(TournamentId)), UserId);
+                    ranking, UserId);
 
                 game.Validate();
                 noticable.AddNotifications(game.Notifications);
@@ -171,16 +194,23 @@ namespace RankingUp.Tournament.Application.Services
                 if (game.Tournament?.IsFinish ?? false)
                     noticable.AddNotification("O Ranking já foi finalizado");
 
+                if (team2 == null || team1.Id == team2.Id)
+                    noticable.AddNotification("Não há times diferentes suficientes na Fila");
+
+                if (ranking != null && (team1.TournamentId != ranking.Id || team2?.TournamentId != ranking.Id))
+                    noticable.AddNotification("Os times devem pertencer ao Ranking informado");
+
                 if (game.Tournament != null)
                 {
-                    var gamePlaying = await _tournamentGameRepository.GetGameNotFinishTournamentId(game.Tournament.UUId);
-                    if (gamePlaying != null && gamePlaying.Count() >= game.Tournament.MatchSameTime)
+                    if (gamesPlaying != null && gamesPlaying.Count() >= game.Tournament.MatchSameTime)
                         noticable.AddNotification("O numero maximo de jogos ao mesmo tempo foi atingido");
                 }
 
                 if (noticable.Valid)
                 {
-                    var playerToDeleteInQueue = playersInQueue.Where(p => p.Team.UUId == team1.UUId || p.Team.UUId == team2.UUId);
+                    var playerToDeleteInQueue = playersInQueue
+                        .Where(player => player.TeamId == team1.Id || player.TeamId == team2.Id)
+                        .ToList();
                     using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                     {
                         foreach (var playerQueue in playerToDeleteInQueue)

@@ -64,8 +64,11 @@ namespace RankingUp.Player.Data.Repositories
 
                 if (player.Clubs == null) player.Clubs = new List<Clubs>();
 
-                player.Sports.Add(Sport);
-                player.Clubs.Add(Clubs);
+                if (Sport != null && !player.Sports.Any(x => x.Id == Sport.Id))
+                    player.Sports.Add(Sport);
+
+                if (Clubs != null && !player.Clubs.Any(x => x.Id == Clubs.Id))
+                    player.Clubs.Add(Clubs);
                 return player;
             };
 
